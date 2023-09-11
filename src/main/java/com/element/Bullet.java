@@ -5,6 +5,7 @@ import com.element.map.Brick;
 import com.element.map.MapElement;
 import com.game.*;
 import com.scene.Stage;
+import com.util.MusicUtil;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class Bullet extends MoveElement {
         this.direct = master.direct;
         this.cango = Game.bulletcango;
         init();
-        Game.PlaySound("开始攻击");
+        MusicUtil.play("开始攻击");
     }
 
     public void setCanGuaiWan(boolean flag) {

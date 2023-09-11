@@ -1,5 +1,7 @@
-package com.game;
+package com.scene;
 
+import com.game.Game;
+import com.game.TankWar;
 import com.scene.Scene;
 import com.scene.Stage;
 

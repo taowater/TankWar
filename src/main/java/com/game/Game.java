@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
 
 public class Game {
 
-    public static final Map<String,BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
+    public static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
 
     public static final BufferedImage materialImage = Game.getMaterial("material");
 
@@ -44,10 +44,6 @@ public class Game {
             {KeyEvent.VK_UP, KeyEvent.VK_RIGHT, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_NUMPAD0},};
     public static boolean[] bulletcango = {true, true, true, false, true, false};
     public static final boolean[] tankcango = {true, true, true, false, false, false};
-
-    public static void PlaySound(String string) {
-        CompletableFuture.runAsync(new Music("music/" + string + ".wav"));
-    }
 
     public static int Reduce(int n, int left, int right, int step) {
         int i = n;
@@ -158,17 +154,15 @@ public class Game {
         String str = "";
         String name = MessageFormat.format("map/map{0}.txt", stage);
 
-
         String path = getPath(name);
         try (BufferedReader bf = new BufferedReader(new FileReader(path))) {
             while (true) {
-                if ((str = bf.readLine()) != null) {
-                    length = str.length();
-                    string += str;
-                    length2++;
-                } else {
+                if ((str = bf.readLine()) == null) {
                     break;
                 }
+                length = str.length();
+                string += str;
+                length2++;
             }
         }
 

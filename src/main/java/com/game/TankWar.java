@@ -1,9 +1,6 @@
 package com.game;
 
-import com.scene.MapEditor;
-import com.scene.Stage;
-import com.scene.StageStart;
-import com.scene.Title;
+import com.scene.*;
 
 import javax.swing.*;
 import java.awt.*;

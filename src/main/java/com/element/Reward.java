@@ -1,6 +1,7 @@
 package com.element;
 
 import com.game.Game;
+import com.util.MusicUtil;
 
 import java.awt.*;
 
@@ -18,7 +19,7 @@ public class Reward extends ElementOld {
 		this.time = 3;
 		this.life = 320;
 		this.isDraw = true;
-		Game.PlaySound("奖励");
+		MusicUtil.play("奖励");
 	}
 
 	@Override

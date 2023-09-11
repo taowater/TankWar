@@ -1,6 +1,7 @@
-package com.game;
+package com.scene;
 
 import com.element.Player;
+import com.game.Game;
 import com.scene.Scene;
 import com.scene.Stage;
 

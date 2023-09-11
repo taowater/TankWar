@@ -4,6 +4,7 @@ import com.element.map.Brick;
 import com.element.map.MapElement;
 import com.game.Game;
 import com.game.TankWar;
+import com.history.core.util.stream.Ztream;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -28,7 +29,7 @@ public class Title extends Scene {
     TankWar tankWar;
     List<Brick> logo;
     public List<Brick> logo2;
-    public List<MapElement> logoRemove = new ArrayList<>();
+    public List<Brick> logoRemove = new ArrayList<>();
 
     private BufferedImage tankImage;
 
@@ -48,27 +49,18 @@ public class Title extends Scene {
         if (open) {
             drawBackground(0, 0, g);
         }
-        for (Object object : logo) {
-            Brick brick = (Brick) object;
-            brick.draw(g, this);
-        }
 
-        for (int i = 0; i < logo2.size(); i++) {
-            Brick brick = (Brick) logo2.get(i);
-            brick.draw(g, this);
-        }
+        Ztream.of(logo).append(logo2).append(logoRemove).forEach(e -> e.draw(g, this));
 
-        for (int i = 0; i < logoRemove.size(); i++) {
-            Brick brick = (Brick) logoRemove.get(i);
-            brick.draw(g, this);
-            if (brick.y > 0 && brick.x < TankWar.WIDTH) {
-                brick.y -= Game.Rand(10);
-                brick.x += Game.Rand(24);
+        Ztream.of(logoRemove).forEach(e -> {
+            if (e.y > 0 && e.x < TankWar.WIDTH) {
+                e.y -= Game.Rand(10);
+                e.x += Game.Rand(24);
             } else {
-                brick.isLive = false;
-                logoRemove.remove(brick);
+                e.isLive = false;
             }
-        }
+        });
+        logoRemove.removeIf(e -> !e.isLive);
         if (!open) {
             drawPressAnyKey(g);
         }
@@ -94,22 +86,16 @@ public class Title extends Scene {
     }
 
     private void drawMenu(int x, int y, Graphics g) {
-        for (int i = 0; i < menu.length; i++) {
-            Game.drawText(menu[i], x + 196, y + MENU_INDEX + 8 + i * 32, 2, g, this);
-        }
+        Ztream.of(menu).forEach((e, i) -> Game.drawText(e, x + 196, y + MENU_INDEX + 8 + i * 32, 2, g, this));
     }
 
     private void drawIndexItem(int x, int y, Graphics g) {
         flag = !flag;
-        if (flag) {
-            indexItem = tankImage.getSubimage(28, 28, 28, 28);
-        } else {
-            indexItem = tankImage.getSubimage(0, 28, 28, 28);
-        }
+        indexItem = tankImage.getSubimage(flag ? 28 : 0, 28, 28, 28);
         g.drawImage(indexItem, x + 160, y + MENU_INDEX + 32 * index, 28, 28, this);
     }
 
-    private void UpIndex() {
+    private void upIndex() {
         if (index > 0) {
             index--;
         } else {
@@ -117,7 +103,7 @@ public class Title extends Scene {
         }
     }
 
-    private void DownIndex() {
+    private void downIndex() {
         if (index < menu.length - 1) {
             index++;
         } else {
@@ -140,9 +126,9 @@ public class Title extends Scene {
         }
         if (open) {
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                UpIndex();
+                upIndex();
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                DownIndex();
+                downIndex();
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (menu == Game.title_menu) {
                     switch (index) {
@@ -165,6 +151,7 @@ public class Title extends Scene {
         }
     }
 
+    @Override
     public void run() {
         while (true) {
             if (Game.Rand(5) < 2 && logo2.size() > 1) {

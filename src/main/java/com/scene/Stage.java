@@ -1,9 +1,12 @@
 package com.scene;
 
 import com.element.*;
+import com.element.inter.Draw;
 import com.element.map.Iron;
 import com.element.map.MapElement;
 import com.game.Game;
+import com.history.core.util.stream.Ztream;
+import com.util.MusicUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -51,53 +54,16 @@ public class Stage extends Scene {
         init();
     }
 
-    // 界面描绘方法
-    public void paint(Graphics g) {
-        super.paint(g);
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, getWidth(), getHeight());
-        // 描绘碉堡
-        fort.draw(g);
-        for (int i = 0; i < elements.size(); i++) {
-            MapElement element = elements.get(i);
-            element.draw(g);
-        }
-        // 描绘敌人坦克
-        for (int i = 0; i < enemys.size(); i++) {
-            Enemy enemy = enemys.get(i);
-            enemy.draw(g);
-        }
+    private void drawElements(Graphics g) {
+        Ztream.of(elements).cast(Draw.class).append(fort).append(players).append(enemys).append(bullets).append(bombs).append(rewards).forEach(e -> e.draw(g));
+    }
 
-        // 描绘子弹
-        for (int i = 0; i < bullets.size(); i++) {
-            Bullet bullet = bullets.get(i);
-            bullet.draw(g);
-        }
-        for (int i = 0; i < players.size(); i++) {
-            Player player = (Player) players.get(i);
-            player.draw(g);
-            if (Game.fogFlag) {
-                drawFog(player, g);
-            }
-        }
-        // 描绘爆炸
-        for (int i = 0; i < bombs.size(); i++) {
-            Bomb bomb = bombs.get(i);
-            if (bomb.isLive) {
-                bomb.draw(g);
-            } else {
-                bombs.remove(bomb);
-            }
-        }
-        // 描绘奖励
-        for (int i = 0; i < rewards.size(); i++) {
-            Reward reward = rewards.get(i);
-            if (reward.isLive) {
-                reward.draw(g);
-            } else {
-                rewards.remove(reward);
-            }
-        }
+    private void removeDeath() {
+        bombs.removeIf(e -> !e.isLive);
+        rewards.removeIf(e -> !e.isLive);
+    }
+
+    private void drawGame(Graphics g) {
         if (Game.pause) {
             drawPause(g);
         }
@@ -109,6 +75,23 @@ public class Stage extends Scene {
         }
     }
 
+    // 界面描绘方法
+    public void paint(Graphics g) {
+        super.paint(g);
+        g.setColor(Color.BLACK);
+        g.fillRect(0, 0, getWidth(), getHeight());
+
+        drawElements(g);
+        Ztream.of(players).forEach(e -> {
+            if (Game.fogFlag) {
+                drawFog(e, g);
+            }
+        });
+        removeDeath();
+        drawGame(g);
+
+    }
+
     private void init() {
         setLayout(null);
         setGameMap();
@@ -117,7 +100,7 @@ public class Stage extends Scene {
         tankWar.setSize(width_temp, tankWar.HEIGHT);
         isLive = true;
         setPlayer();
-        Game.PlaySound("开局");
+        MusicUtil.start();
     }
 
     private void setPlayer() {
@@ -313,7 +296,7 @@ public class Stage extends Scene {
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (!Game.pause && !over) {
-                Game.PlaySound("暂停");
+                MusicUtil.play("暂停");
             }
             if (isLive) {
                 Game.pause = !Game.pause;

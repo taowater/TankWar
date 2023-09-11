@@ -1,14 +1,14 @@
 package com.element;
 
+import com.element.inter.Draw;
 import com.game.Game;
 import com.scene.Scene;
+import com.util.MusicUtil;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-interface Draw {
-	void draw(Graphics g);
-}
+
 
 /**
  * @author Zhu_wuliu
@@ -70,7 +70,7 @@ class BigBomb extends Bomb {
 	public BigBomb(int x, int y) {
 		super(x, y);
 		this.life = 4;
-		Game.PlaySound("爆炸");
+		MusicUtil.play("爆炸");
 	}
 
 	public boolean isTouch(ElementOld material) {

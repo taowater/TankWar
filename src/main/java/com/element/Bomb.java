@@ -1,6 +1,7 @@
 package com.element;
 
 import com.game.Game;
+import com.util.MusicUtil;
 
 import java.awt.*;
 
@@ -9,7 +10,7 @@ public class Bomb extends ElementOld {
     public Bomb(int x, int y) {
         super(x, y);
         this.life = 4;
-        Game.PlaySound("攻击结束");
+        MusicUtil.play("攻击结束");
     }
 
     @Override

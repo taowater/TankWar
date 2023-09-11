@@ -3,6 +3,7 @@ package com.game;
 import lombok.SneakyThrows;
 
 import javax.sound.sampled.*;
+import javax.sound.sampled.spi.AudioFileReader;
 import java.io.File;
 
 /**

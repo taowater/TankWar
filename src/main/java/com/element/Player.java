@@ -2,6 +2,7 @@ package com.element;
 
 import com.element.map.MapElement;
 import com.game.Game;
+import com.util.MusicUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -83,7 +84,7 @@ public class Player extends Tank {
             if (getRect().intersects(reward.getRect())) {
                 Game.stage.Reward(this, reward);
                 reward.isLive = false;
-                Game.PlaySound("奖励");
+                MusicUtil.play("奖励");
             }
         }
     }
@@ -103,7 +104,7 @@ public class Player extends Tank {
             MapElement element = Game.getStage().elements.get(i);
             if (isTouch(element)) {
                 if (element.type == 3) {
-                    Game.PlaySound("移动");
+                    MusicUtil.play("移动");
                     Game.getStage().elements.remove(element);
                 }
             }

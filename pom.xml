@@ -24,5 +24,10 @@
             <artifactId>hutool-all</artifactId>
             <version>5.8.21</version>
         </dependency>
+        <dependency>
+            <groupId>com.history</groupId>
+            <artifactId>history-core</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>
