@@ -12,13 +12,14 @@ public class Brick extends MapElement {
 
     public Brick(int x, int y) {
         super(x, y, MapElementType.BRICK);
-        this.flag = new boolean[]{true,true,true,true};
+        this.flag = new boolean[]{true, true, true, true};
     }
 
     @Override
     public void draw(Graphics g) {
-        this.draw(g,Game.getStage());
+        this.draw(g, Game.getStage());
     }
+
     public void draw(Graphics g, Scene scene) {
         if (isLive) {
             boolean flag_temp = false;
@@ -28,7 +29,7 @@ public class Brick extends MapElement {
                     int x_temp = (i % 2) * 8;
                     int y_temp = (i / 2) * 8;
                     part = image.getSubimage(x_temp, y_temp, 8, 8);
-                    g.drawImage(part, x+x_temp, y+y_temp, 8, 8, Game.getStage());
+                    g.drawImage(part, x + x_temp, y + y_temp, 8, 8, Game.getStage());
                     flag_temp = true;
                 }
             }

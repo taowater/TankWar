@@ -3,6 +3,7 @@ package com.element;
 import com.element.enums.MapElementType;
 import com.element.map.MapElement;
 import com.game.Game;
+import lombok.Getter;
 
 import java.util.EnumMap;
 
@@ -20,9 +21,9 @@ public class MoveElement extends ElementOld {
     // 方向
     int direct;
     int speed;
-    boolean[] cango;
 
-    EnumMap<MapElementType,Boolean> cango2;
+    @Getter
+    EnumMap<MapElementType, Boolean> cango;
     boolean going = false;
 
     private MoveElement(int x, int y) {
@@ -37,6 +38,7 @@ public class MoveElement extends ElementOld {
     void setDirect(int direct) {
         this.direct = direct;
     }
+
     int getL(int direct) {
         if (direct == 0) {
             return 3;
@@ -58,18 +60,14 @@ public class MoveElement extends ElementOld {
     // 移动
     public void move() {
         switch (this.direct) {
-            case UP:// 上
-                y -= speed;
-                break;
-            case RIGHT:// 右
-                x += speed;
-                break;
-            case DOWN:// 下
-                y += speed;
-                break;
-            case LEFT:// 左
-                x -= speed;
-                break;
+            case UP ->// 上
+                    y -= speed;
+            case RIGHT ->// 右
+                    x += speed;
+            case DOWN ->// 下
+                    y += speed;
+            case LEFT ->// 左
+                    x -= speed;
         }
     }
 
@@ -124,7 +122,7 @@ public class MoveElement extends ElementOld {
     boolean isTouchWall() {
         for (int i = 0; i < Game.getStage().elements.size(); i++) {
             MapElement element = Game.getStage().elements.get(i);
-            if ((isTouch(element) && !this.cango[element.getMapType().ordinal() + 1])) {
+            if ((isTouch(element) && !getCango().get(element.getMapType()))) {
                 return true;
             }
         }

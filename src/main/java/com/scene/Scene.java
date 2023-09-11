@@ -7,37 +7,43 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
-public abstract class Scene extends JPanel implements Runnable, MouseMotionListener, MouseListener{
+public abstract class Scene extends JPanel implements Runnable, MouseMotionListener, MouseListener {
 
-	int flag = 16;
-	int starttime = 8;
-	void drawStart(Graphics g) {
-		g.setColor(Color.GRAY);
-		g.fillRect(0, 0, this.getWidth(), this.getHeight() / 2 - (8 - starttime) * 32);
-		g.fillRect(0, this.getHeight() / 2 + (8 - starttime) * 32, this.getWidth(), this.getHeight() / 2);
-	}
-	public void mouseClicked(MouseEvent arg0) {
-	}
+    protected Scene(){
+        super(true);
+    }
 
-	public void mouseEntered(MouseEvent arg0) {
-	}
+    int flag = 16;
+    int starttime = 8;
 
-	public void mouseExited(MouseEvent arg0) {
-	}
+    void drawStart(Graphics g) {
+        g.setColor(Color.GRAY);
+        g.fillRect(0, 0, this.getWidth(), this.getHeight() / 2 - (8 - starttime) * 32);
+        g.fillRect(0, this.getHeight() / 2 + (8 - starttime) * 32, this.getWidth(), this.getHeight() / 2);
+    }
 
-	public void mousePressed(MouseEvent arg0) {
-	}
+    public void mouseClicked(MouseEvent arg0) {
+    }
 
-	public void mouseReleased(MouseEvent arg0) {
-	}
+    public void mouseEntered(MouseEvent arg0) {
+    }
 
-	public void mouseDragged(MouseEvent arg0) {
-	}
+    public void mouseExited(MouseEvent arg0) {
+    }
 
-	public void mouseMoved(MouseEvent arg0) {
-	}
+    public void mousePressed(MouseEvent arg0) {
+    }
 
-	public void run() {
-	}
+    public void mouseReleased(MouseEvent arg0) {
+    }
+
+    public void mouseDragged(MouseEvent arg0) {
+    }
+
+    public void mouseMoved(MouseEvent arg0) {
+    }
+
+    public void run() {
+    }
 
 }

@@ -1,11 +1,13 @@
 package com.element;
 
+import com.element.enums.MapElementType;
 import com.game.Game;
 import com.game.Music;
 import com.history.core.util.stream.Ztream;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.EnumMap;
 import java.util.Vector;
 
 // 坦克的类，所有坦克的父类
@@ -36,9 +38,19 @@ public class Tank extends MoveElement {
 		this.width = 32;
 		this.height = 32;
 		this.speed = 16;
-		this.cango = Game.tankcango;
+		this.cango = Tank.GO_MAP;
 		this.star = new Star(this);
 
+	}
+
+	public static EnumMap<MapElementType, Boolean> GO_MAP = new EnumMap<>(MapElementType.class);
+
+	static {
+		GO_MAP.put(MapElementType.TREE, true);
+		GO_MAP.put(MapElementType.SNOW, true);
+		GO_MAP.put(MapElementType.BRICK, false);
+		GO_MAP.put(MapElementType.WATER, false);
+		GO_MAP.put(MapElementType.IRON, false);
 	}
 
 	public void draw(Graphics g, BufferedImage image) {

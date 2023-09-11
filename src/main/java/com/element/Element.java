@@ -13,7 +13,4 @@ public abstract class Element implements Printable {
     private Integer width;
     //高度
     private Integer height;
-
-    @Override
-    public abstract void print();
 }

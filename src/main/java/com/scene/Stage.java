@@ -55,6 +55,7 @@ public class Stage extends Scene {
     private int[][] fog;
 
     public Stage() {
+        super();
         init();
     }
 
@@ -65,6 +66,7 @@ public class Stage extends Scene {
     private void removeDeath() {
         bombs.removeIf(e -> !e.isLive);
         rewards.removeIf(e -> !e.isLive);
+        elements.removeIf(e -> !e.isLive);
     }
 
     private void drawGame(Graphics g) {
