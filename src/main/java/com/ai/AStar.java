@@ -1,9 +1,11 @@
 package com.ai;
 
 import com.game.Game;
+import com.history.core.util.EmptyUtil;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Zhu_wuliu
@@ -16,8 +18,8 @@ public class AStar {
     // 起点
     private Node endNode;
     // 使用ArrayList数组作为“开启列表”和“关闭列表”
-    private final ArrayList<Node> open = new ArrayList<>();
-    private final ArrayList<Node> close = new ArrayList<>();
+    private final List<Node> open = new ArrayList<>();
+    private final List<Node> close = new ArrayList<>();
 
     public AStar(int[][] currenMap, int x1, int y1, int x2, int y2) {
 
@@ -32,24 +34,26 @@ public class AStar {
     }
 
     // 获取H值 currentNode：当前节点 endNode：终点
-    private int getHValue(Node currentNode, Node endNode) {
+    private int getH(Node currentNode, Node endNode) {
         return (Math.abs(currentNode.x - endNode.x) + Math.abs(currentNode.y - endNode.y));
     }
 
     // 获取G值 currentNode：当前节点 return
-    private int getGValue(Node currentNode) {
-        if (currentNode.fatherNode != null) {
-            if (currentNode.x == currentNode.fatherNode.x || currentNode.y == currentNode.fatherNode.y) {
+    private int getG(Node currentNode) {
+        Node fatherNode = currentNode.fatherNode;
+        if (fatherNode != null) {
+
+            if (currentNode.x == fatherNode.x || currentNode.y == fatherNode.y) {
                 // 判断当前节点与其父节点之间的位置关系（水平？对角线）
-                return currentNode.G + 1;
+                return currentNode.g + 1;
             }
         }
-        return currentNode.G;
+        return currentNode.g;
     }
 
     // 获取F值 ： G + H currentNode return
-    private int getFValue(Node currentNode) {
-        return currentNode.G + currentNode.H;
+    private int getF(Node currentNode) {
+        return currentNode.g + currentNode.h;
     }
 
     // 将选中节点周围的节点添加进“开启列表” node
@@ -93,9 +97,9 @@ public class AStar {
                 if (node2.cango && !open.contains(node2)) {
                     node2.fatherNode = map[x][y];
                     // 将选中节点作为父节点
-                    node2.G = getGValue(node2);
-                    node2.H = getHValue(node2, endNode);
-                    node2.F = getFValue(node2);
+                    node2.g = getG(node2);
+                    node2.h = getH(node2, endNode);
+                    node2.f = getF(node2);
                     open.add(node2);
                 }
             }
@@ -103,10 +107,10 @@ public class AStar {
     }
 
     // 使用冒泡排序将开启列表中的节点按F值从小到大排序
-    private void sort(ArrayList<Node> arr) {
+    private void sort(List<Node> arr) {
         for (int i = 0; i < arr.size() - 1; i++) {
             for (int j = i + 1; j < arr.size(); j++) {
-                if (arr.get(i).F > arr.get(j).F) {
+                if (arr.get(i).f > arr.get(j).f) {
                     Node tmp = arr.get(i);
                     arr.set(i, arr.get(j));
                     arr.set(j, tmp);
@@ -114,8 +118,9 @@ public class AStar {
             }
         }
     }
+
     // 将节点添加进“关闭列表”
-    private void inClose(Node node, ArrayList<Node> open) {
+    private void inClose(Node node, List<Node> open) {
         if (open.contains(node)) {
             node.cango = false;
             // 设置为不可达
@@ -124,7 +129,7 @@ public class AStar {
         }
     }
 
-    public ArrayList<Point> search() {
+    public List<Point> search() {
         // 对起点即起点周围的节点进行操作
         if (endNode == null || !map[endNode.x][endNode.y].cango) {
             for (int i = 0; i < 8; i++) {
@@ -143,16 +148,15 @@ public class AStar {
         sort(open);
         // 重复步骤
         do {
-            if (open.size() > 0) {
+            if (EmptyUtil.isNotEmpty(open)) {
                 inOpen(open.get(0));
                 inClose(open.get(0), open);
             }
-            sort(open);
-        } while (open.size() > 0 && !open.contains(map[endNode.x][endNode.y]));
+        } while (EmptyUtil.isNotEmpty(open) && !open.contains(map[endNode.x][endNode.y]));
         // 知道开启列表中包含终点时，循环退出
         inClose(map[endNode.x][endNode.y], open);
-        ArrayList<Point> path = null;
-        if (close.size() > 0) {
+        List<Point> path = null;
+        if (EmptyUtil.isNotEmpty(close)) {
             path = new ArrayList<>();
             Node node = map[endNode.x][endNode.y];
             while (node != null && !(node.x == startNode.x && node.y == startNode.y)) {
@@ -166,46 +170,46 @@ public class AStar {
 
     private Node getDirectNode(Node node, int direct) {
         switch (direct) {
-            case 0:
+            case 0 -> {
                 if (node.x - 1 >= 0) {
                     return map[node.x - 1][node.y];
                 }
-                break;
-            case 1:
+            }
+            case 1 -> {
                 if (node.y + 1 < map[0].length) {
                     return map[node.x][node.y + 1];
                 }
-                break;
-            case 2:
+            }
+            case 2 -> {
                 if (node.x + 1 < map.length) {
                     return map[node.x + 1][node.y];
                 }
-                break;
-            case 3:
+            }
+            case 3 -> {
                 if (node.y - 1 >= 0) {
                     return map[node.x][node.y - 1];
                 }
-                break;
-            case 4:
+            }
+            case 4 -> {
                 if (node.x - 1 >= 0 && node.y - 1 >= 0) {
                     return map[node.x - 1][node.y - 1];
                 }
-                break;
-            case 5:
+            }
+            case 5 -> {
                 if (node.x - 1 >= 0 && node.y + 1 < map[0].length) {
                     return map[node.x - 1][node.y + 1];
                 }
-                break;
-            case 6:
+            }
+            case 6 -> {
                 if (node.x + 1 < map.length && node.y + 1 < map[0].length) {
                     return map[node.x + 1][node.y + 1];
                 }
-                break;
-            case 7:
+            }
+            case 7 -> {
                 if (node.x + 1 < map.length && node.y - 1 >= 0) {
                     return map[node.x + 1][node.y - 1];
                 }
-                break;
+            }
         }
         return null;
     }
@@ -214,9 +218,9 @@ public class AStar {
 class Node {
     final int x; // x坐标
     final int y; // y坐标
-    int F = 0; // F值
-    int G = 0; // G值
-    int H = 0; // H值
+    int f = 0; // F值
+    int g = 0; // G值
+    int h = 0; // H值
     boolean cango; // 是否可到达（是否为障碍物）
     Node fatherNode; // 父节点
 

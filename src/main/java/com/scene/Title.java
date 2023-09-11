@@ -96,19 +96,11 @@ public class Title extends Scene {
     }
 
     private void upIndex() {
-        if (index > 0) {
-            index--;
-        } else {
-            index = 0;
-        }
+        index = Math.max(0, index - 1);
     }
 
     private void downIndex() {
-        if (index < menu.length - 1) {
-            index++;
-        } else {
-            index = menu.length - 1;
-        }
+        index = Math.min(index + 1, menu.length - 1);
     }
 
     public void toSelect() {
@@ -132,14 +124,10 @@ public class Title extends Scene {
             } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (menu == Game.title_menu) {
                     switch (index) {
-                        case 0:
-                            toSelect();
-                            break;
-                        case 1:
-                            tankWar.toEditor();
-                            break;
-                        default:
-                            break;
+                        case 0 -> toSelect();
+                        case 1 -> tankWar.toEditor();
+                        default -> {
+                        }
                     }
                 } else if (menu == Game.title_menu2) {
                     Game.player_number = index + 1;

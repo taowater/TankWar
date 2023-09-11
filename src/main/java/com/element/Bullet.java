@@ -278,7 +278,7 @@ public class Bullet extends MoveElement {
         if (i >= 0 && j >= 0 && tank.isLive) {
             if (y % 16 == 0 && x % 16 == 0) {
                 int[][] currenMap = getCurrentMap(Game.bulletcango);
-                ArrayList<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
+                List<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
                 if (path.size() > 0) {
                     Point point = path.get(path.size() - 1);
                     this.direct = getNextStep(point.x, point.y);

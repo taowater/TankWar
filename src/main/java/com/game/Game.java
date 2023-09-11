@@ -107,7 +107,7 @@ public class Game {
         return Game.stage.getMap();
     }
 
-    public static java.util.List<Brick> getLogo(int key) {
+    public static List<Brick> getLogo(int key) {
         int[][] map = Game.getMap(0);
         int length = map[0].length;
         List<Brick> logo = new ArrayList<>();
@@ -135,8 +135,7 @@ public class Game {
     );
 
     public static MapElement creatMapElement(int type, int x, int y) {
-        var fun = mapBuilder.get(type);
-        return Any.of(fun).get( f->f.apply(x, y));
+        return Any.of(mapBuilder.get(type)).get(f -> f.apply(x, y));
     }
 
     @SneakyThrows
@@ -146,7 +145,7 @@ public class Game {
     }
 
     public static int[][] getMap(int stage) {
-       return  MAP_CACHE.computeIfAbsent(stage,Game::doGetMap);
+        return MAP_CACHE.computeIfAbsent(stage, Game::doGetMap);
     }
 
     @SneakyThrows

@@ -4,7 +4,7 @@ import com.ai.AStar;
 import com.game.Game;
 
 import java.awt.*;
-import java.util.ArrayList;
+import java.util.List;
 
 // 敌方坦克的类
 public class Enemy extends Tank {
@@ -130,7 +130,7 @@ public class Enemy extends Tank {
                 if (i > 0 && j > 0 && player.isLive) {
                     if (!going) {
                         int[][] currenMap = getCurrentMap(Game.tankcango);
-                        ArrayList<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
+                        List<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
                         if (path.size() > 0) {
                             Point point = path.get(path.size() - 1);
                             this.direct = getNextStep(point.x, point.y);
@@ -153,7 +153,7 @@ public class Enemy extends Tank {
             Fort fort = Game.stage.fort;
             if (!going) {
                 int[][] currenMap = getCurrentMap(Game.tankcango);
-                ArrayList<Point> path = new AStar(currenMap, y / 16, x / 16, 24, target).search();
+                List<Point> path = new AStar(currenMap, y / 16, x / 16, 24, target).search();
                 if (path.size() > 0) {
                     Point point = path.get(path.size() - 1);
                     this.direct = getNextStep(point.x, point.y);
