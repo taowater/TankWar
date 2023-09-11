@@ -1,0 +1,232 @@
+package com.game;
+
+import com.element.map.*;
+import com.scene.Stage;
+import lombok.SneakyThrows;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
+
+public class Game {
+
+    public static final Map<String,BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
+
+    public static final BufferedImage materialImage = Game.getMaterial("material");
+
+    public static boolean fogFlag = false;
+    public static boolean pause = false;
+    public static int stagesth = 1;
+    public static int player_number = 1;
+    public static TankWar tankWar;
+    public static Stage stage = null;
+    public static boolean edited = false;
+    public static int[][] editon_map;
+    public static boolean fail = false;
+    public static String[] title_menu = {"NEW GAME", "CONSTRUCTION"};
+    public static String[] title_menu2 = {"1 PLAYER", "2 PLAYERS"};
+    public static final int[][] PlayerDIRECT = {{KeyEvent.VK_W, KeyEvent.VK_D, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_H},
+            {KeyEvent.VK_UP, KeyEvent.VK_RIGHT, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_NUMPAD0},};
+    public static boolean[] bulletcango = {true, true, true, false, true, false};
+    public static final boolean[] tankcango = {true, true, true, false, false, false};
+
+    public static void PlaySound(String string) {
+        CompletableFuture.runAsync(new Music("music/" + string + ".wav"));
+    }
+
+    public static int Reduce(int n, int left, int right, int step) {
+        int i = n;
+        if (i > left) {
+            return i - step;
+        } else {
+            return right;
+        }
+    }
+
+    //判断A点在B点的上下左右包括斜方向8个方位哪个位置，返回0到7
+    public static int getAinBdirection(Point a, Point b) {
+        if (a.x == b.x && a.y < b.y) {
+            return 0;
+        }
+        if (a.x > b.x && a.y == b.y) {
+            return 1;
+        }
+        if (a.x == b.x && a.y > b.y) {
+            return 2;
+        }
+        if (a.x < b.x && a.y == b.y) {
+            return 3;
+        }
+        if (a.x < b.x && a.y < b.y) {
+            return 4;
+        }
+        if (a.x > b.x && a.y < b.y) {
+            return 5;
+        }
+        if (a.x > b.x && a.y > b.y) {
+            return 6;
+        }
+        if (a.x < b.x && a.y > b.y) {
+            return 7;
+        }
+        return 0;
+    }
+
+    public static int Rand(int n) {
+        return (int) (Math.random() * n);
+    }
+
+    public static void GameInit() {
+        Game.fail = false;
+        Game.tankWar.setSize(TankWar.WIDTH, TankWar.HEIGHT);
+        Game.stagesth = 1;
+    }
+
+    @SneakyThrows
+    public static void Sleep(int time) {
+        Thread.sleep(time);
+    }
+
+    public static Stage getStage() {
+        return Game.stage;
+    }
+
+    public static int[][] getStageMap() {
+        return Game.stage.getMap();
+    }
+
+    public static java.util.List<Brick> getLogo(int key) {
+        int[][] map = Game.getMap(0);
+        int length = map[0].length;
+        ArrayList<Brick> logo = new ArrayList<>();
+        for (int i = 0; i + 1 < 12; i += 2) {
+            for (int j = 0; j + 1 < length; j += 2) {
+                Brick brick = new Brick(24 + j * 8, 64 + 16 + i * 8);
+                brick.flag[0] = (map[i][j] == key);
+                brick.flag[1] = (map[i][j + 1] == key);
+                brick.flag[2] = (map[i + 1][j] == key);
+                brick.flag[3] = (map[i + 1][j + 1] == key);
+                if (brick.flag[0] || brick.flag[1] || brick.flag[2] || brick.flag[3]) {
+                    logo.add(brick);
+                }
+            }
+        }
+        return logo;
+    }
+
+    public static final List<BiFunction<Integer, Integer, MapElement>> mapBuilder = List.of(
+            Brick::new,
+            Tree::new,
+            Snow::new,
+            Brick::new,
+            Water::new,
+            Iron::new
+    );
+
+    public static MapElement creatMapElement(int type, int x, int y) {
+        var fun = mapBuilder.get(type);
+        return fun.apply(x, y);
+    }
+
+    @SneakyThrows
+    public static String getPath(String path) {
+        String realPath = Game.class.getClassLoader().getResource(path).getPath();
+        return URLDecoder.decode(realPath, StandardCharsets.UTF_8);
+    }
+
+    @SneakyThrows
+    public static int[][] getMap(int stage) {
+        int[][] map;
+        int length = 0;
+        int length2 = 0;
+        String string = "";
+        String str = "";
+        String name = MessageFormat.format("map/map{0}.txt", stage);
+
+
+        String path = getPath(name);
+        try (BufferedReader bf = new BufferedReader(new FileReader(path))) {
+            while (true) {
+                if ((str = bf.readLine()) != null) {
+                    length = str.length();
+                    string += str;
+                    length2++;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        int index = 0;
+        char[] mapchar = string.toCharArray();
+        map = new int[length2][length];
+        int cow = length2;
+        int col = length;
+        for (int i = 0; i < cow; i++) {
+            for (int j = 0; j < col; j++) {
+                if (index < mapchar.length) {
+                    map[i][j] = mapchar[index++] - 48;
+                }
+            }
+        }
+        return map;
+    }
+
+    @SneakyThrows
+    public static BufferedImage getMaterial(String imagePath) {
+        return IMAGE_CACHE.computeIfAbsent("image/" + imagePath + ".png", k -> {
+            try {
+                return ImageIO.read(new File(getPath(k)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static void drawText(String string, int x, int y, int color, Graphics g, JPanel panel) {
+        int index = 0;
+        BufferedImage wordimage = null;
+        BufferedImage words = getMaterial("words");
+        for (char word : string.toCharArray()) {
+            if (word >= 'A' && word <= 'Z') {
+                wordimage = words.getSubimage((word - 65) % 14 * 16, color * 48 + (word - 65) / 14 * 16, 16, 16);
+            } else if (word >= '0' && word <= '9') {
+                wordimage = words.getSubimage((word - 48) * 16, color * 48 + 32, 16, 16);
+            } else if (word == ' ') {
+                wordimage = words.getSubimage(12 * 16, color * 48 + 16, 16, 16);
+            } else if (word == '*') {
+                wordimage = words.getSubimage(13 * 16, color * 48 + 32, 16, 16);
+            } else if (word == '<') {
+                wordimage = words.getSubimage(10 * 16, color * 48 + 32, 16, 16);
+            } else if (word == '>') {
+                wordimage = words.getSubimage(12 * 16, color * 48 + 32, 16, 16);
+            } else if (word == '_') {
+                wordimage = words.getSubimage(11 * 16, color * 48 + 32, 16, 16);
+            } else if (word == '.') {
+                wordimage = words.getSubimage(13 * 16, color * 48 + 16, 16, 16);
+            }
+            if (x + (index++) * 16 >= TankWar.WIDTH - 128 && word == ' ' || word == '!') {
+                y += 32;
+                index = 0;
+            }
+            if (word != '!') {
+                g.drawImage(wordimage, x + (index) * 16, y, 16, 16, panel);
+            }
+        }
+    }
+}
