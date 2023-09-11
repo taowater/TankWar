@@ -1,8 +1,8 @@
 package com.element;
 
 import com.element.enums.MapElementType;
-import com.element.map.MapElement;
 import com.game.Game;
+import com.history.core.util.stream.Ztream;
 import lombok.Getter;
 
 import java.util.EnumMap;
@@ -120,16 +120,7 @@ public class MoveElement extends ElementOld {
     }
 
     boolean isTouchWall() {
-        for (int i = 0; i < Game.getStage().elements.size(); i++) {
-            MapElement element = Game.getStage().elements.get(i);
-            if ((isTouch(element) && !getCango().get(element.getMapType()))) {
-                return true;
-            }
-        }
-        if (!isInStage()) {
-            return true;
-        }
-        return false;
+        return Ztream.of(Game.getStage().elements).anyMatch(e-> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
     }
 
     int getNextStep(int i, int j) {

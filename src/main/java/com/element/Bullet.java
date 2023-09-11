@@ -3,9 +3,10 @@ package com.element;
 import com.ai.AStar;
 import com.element.enums.MapElementType;
 import com.element.map.Brick;
+import com.element.map.Iron;
 import com.element.map.MapElement;
 import com.game.*;
-import com.history.core.util.Any;
+import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.scene.Stage;
 import com.util.MusicUtil;
@@ -170,67 +171,58 @@ public class Bullet extends MoveElement {
     }
 
     private void bitSmallBrick(MapElement[] elements, int begin) {
-        for (int key = 0; key < elements.length; key++) {
-            MapElement mapElement = elements[key];
-            if (Any.of(mapElement).get(MapElement::getMapType) == MapElementType.BRICK) {
-                Brick brick = (Brick) mapElement;
+        Ztream.of(elements).forEach(e -> {
+            if (e instanceof Brick brick) {
                 for (int i = begin; i - begin < 2; i++) {
                     brick.flag[list[i]] = false;
                 }
             }
-        }
+        });
     }
 
     private void bitBrick() {
         MapElement[] elements = getbBitElement();
-        if (elements != null) {
-            if (direct > 3) {
-                for (MapElement mapElement : elements) {
-                    if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
-                        if (mapElement.getMapType() == MapElementType.IRON) {
-                            if (master.isPlayer) {
-                                Player player = (Player) master;
-                                if (player.level > 2) {
-                                    mapElement.isLive = false;
-                                }
-                            }
-                        } else {
+        if (direct > 3) {
+            for (MapElement mapElement : elements) {
+                if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
+                    if (mapElement instanceof Iron) {
+                        if (master instanceof Player player && player.level > 2) {
                             mapElement.isLive = false;
                         }
+                    } else {
+                        mapElement.isLive = false;
                     }
                 }
-            } else {
-                MapElement[] element_temp = new MapElement[4];
-                boolean[] isSmallElementLive = new boolean[element_temp.length];
-                for (int key = 0; key < elements.length; key++) {
-                    MapElement mapElement = elements[key];
-                    if (mapElement != null) {
-                        if (mapElement.getMapType() == MapElementType.BRICK) {
-                            isSmallElementLive[key] = true;
-                            Brick brick = (Brick) mapElement;
-                            isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
-                        } else if (mapElement.getMapType() == MapElementType.IRON) {
-                            if (master.isPlayer) {
-                                Player player = (Player) master;
-                                if (player.level > 2) {
-                                    mapElement.isLive = false;
-                                }
+            }
+        } else {
+            MapElement[] element_temp = new MapElement[4];
+            boolean[] isSmallElementLive = new boolean[element_temp.length];
+            for (int key = 0; key < elements.length; key++) {
+                MapElement mapElement = elements[key];
+                if (mapElement != null) {
+                    if (mapElement instanceof Brick brick) {
+                        isSmallElementLive[key] = true;
+                        isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
+                    } else if (mapElement instanceof Iron iron) {
+                        if (master instanceof Player player) {
+                            if (player.level > 2) {
+                                iron.isLive = false;
                             }
                         }
                     }
+                }
 
+            }
+            boolean flag = false;
+            for (int i = 0; i < isSmallElementLive.length; i++) {
+                if (isSmallElementLive[i]) {
+                    flag = true;
                 }
-                boolean flag = false;
-                for (int i = 0; i < isSmallElementLive.length; i++) {
-                    if (isSmallElementLive[i]) {
-                        flag = true;
-                    }
-                }
-                if (flag) {
-                    bitSmallBrick(elements, 0);
-                } else {
-                    bitSmallBrick(elements, 2);
-                }
+            }
+            if (flag) {
+                bitSmallBrick(elements, 0);
+            } else {
+                bitSmallBrick(elements, 2);
             }
         }
     }
@@ -279,7 +271,7 @@ public class Bullet extends MoveElement {
             if (y % 16 == 0 && x % 16 == 0) {
                 int[][] currenMap = getCurrentMap(Game.bulletcango);
                 List<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
-                if (path.size() > 0) {
+                if (EmptyUtil.isNotEmpty(path)) {
                     Point point = path.get(path.size() - 1);
                     this.direct = getNextStep(point.x, point.y);
                 }
@@ -288,8 +280,8 @@ public class Bullet extends MoveElement {
     }
 
     private void guaiwan() {
-        Vector<Enemy> tanks = Game.getStage().getEnemys();
-        if (tanks.size() > 0) {
+        List<Enemy> tanks = Game.getStage().getEnemys();
+        if (EmptyUtil.isNotEmpty(tanks)) {
             TrackFly(tanks.get(0));
         } else {
             if (isTouchWall()) {
