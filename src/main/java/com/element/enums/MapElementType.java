@@ -1,5 +1,10 @@
 package com.element.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum MapElementType {
 
     /**
@@ -22,5 +27,7 @@ public enum MapElementType {
      * 铁
      */
     IRON,
+
+//    private final String  image;
 
 }

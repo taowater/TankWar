@@ -1,5 +1,6 @@
 package com.element.map;
 
+import com.element.enums.MapElementType;
 import com.game.Game;
 
 import java.awt.*;
@@ -9,10 +10,7 @@ public class Water extends MapElement {
     int flag = 0;
 
     public Water(int x, int y) {
-        super(x, y);
-        type = 4;
-        getImage(type);
-        isWater = true;
+        super(x, y, MapElementType.WATER);
     }
 
     @Override

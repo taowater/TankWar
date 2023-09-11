@@ -1,7 +1,10 @@
 package com.element;
 
+import com.element.enums.MapElementType;
 import com.element.map.MapElement;
 import com.game.Game;
+
+import java.util.EnumMap;
 
 // 可移动元素块的类
 public class MoveElement extends ElementOld {
@@ -18,6 +21,8 @@ public class MoveElement extends ElementOld {
     int direct;
     int speed;
     boolean[] cango;
+
+    EnumMap<MapElementType,Boolean> cango2;
     boolean going = false;
 
     private MoveElement(int x, int y) {
@@ -119,7 +124,7 @@ public class MoveElement extends ElementOld {
     boolean isTouchWall() {
         for (int i = 0; i < Game.getStage().elements.size(); i++) {
             MapElement element = Game.getStage().elements.get(i);
-            if ((isTouch(element) && !this.cango[element.type])) {
+            if ((isTouch(element) && !this.cango[element.getMapType().ordinal() + 1])) {
                 return true;
             }
         }

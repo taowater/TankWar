@@ -1,7 +1,9 @@
 package com.element;
 
+import com.element.enums.MapElementType;
 import com.element.map.MapElement;
 import com.game.Game;
+import com.history.core.util.stream.Ztream;
 import com.util.MusicUtil;
 
 import java.awt.*;
@@ -80,13 +82,13 @@ public class Player extends Tank {
 
     // 获得奖励
     void beRewarded() {
-        for (Reward reward : Game.getStage().getRewards()) {
-            if (getRect().intersects(reward.getRect())) {
-                Game.stage.Reward(this, reward);
-                reward.isLive = false;
+        Ztream.of(Game.getStage().getRewards()).forEach(e -> {
+            if (getRect().intersects(e.getRect())) {
+                Game.stage.Reward(this, e);
+                e.isLive = false;
                 MusicUtil.play("奖励");
             }
-        }
+        });
     }
 
     // 移动
@@ -99,11 +101,11 @@ public class Player extends Tank {
         }
     }
 
-    void ClearBrick() {
+    void clearBrick() {
         for (int i = 0; i < Game.getStage().elements.size(); i++) {
             MapElement element = Game.getStage().elements.get(i);
             if (isTouch(element)) {
-                if (element.type == 3) {
+                if (element.getMapType() == MapElementType.BRICK) {
                     MusicUtil.play("移动");
                     Game.getStage().elements.remove(element);
                 }

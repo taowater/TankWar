@@ -1,5 +1,6 @@
 package com.element.map;
 
+import com.element.enums.MapElementType;
 import com.game.Game;
 import com.scene.Scene;
 
@@ -10,11 +11,8 @@ public class Brick extends MapElement {
     public boolean[] flag;
 
     public Brick(int x, int y) {
-        super(x, y);
+        super(x, y, MapElementType.BRICK);
         this.flag = new boolean[]{true,true,true,true};
-        type = 3;
-        getImage(type);
-        isBrick = true;
     }
 
     @Override

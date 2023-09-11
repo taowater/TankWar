@@ -1,11 +1,10 @@
 package com.element.map;
 
+import com.element.enums.MapElementType;
+
 public class Snow extends MapElement {
 
     public Snow(int x, int y) {
-        super(x, y);
-        type = 2;
-        getImage(type);
-        isSnow = true;
+        super(x, y,MapElementType.SNOW);
     }
 }

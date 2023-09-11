@@ -2,6 +2,7 @@ package com.scene;
 
 import com.element.map.MapElement;
 import com.game.Game;
+import com.history.core.util.stream.Ztream;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -56,11 +57,10 @@ public class MapEditor extends Scene {
 
     private void drawMap(Graphics g) {
         int length = map.size();
-        for (int i = 0; i < length; i++) {
-            MapElement mapElement = map.get(i);
-            mapElement.draw(g, this);
-            map_temp[mapElement.y / 16][mapElement.x / 16] = mapElement.type;
-        }
+        Ztream.of(map).forEach(e->{
+            e.draw(g, this);
+            map_temp[e.y / 16][e.x / 16] = e.getMapType().ordinal() + 1;
+        });
     }
 
     private MapElement getMapElement(int X, int Y) {
@@ -85,8 +85,8 @@ public class MapEditor extends Scene {
         if (mapElement_tamp != null) {
             map.remove(mapElement_tamp);
         }
-        MapElement element = Game.creatMapElement(index + 1, X, Y);
-        map_temp[Y / 16][X / 16] = element.type;
+        MapElement element = Game.creatMapElement(index, X, Y);
+        map_temp[Y / 16][X / 16] = element.getMapType().ordinal() + 1;
         map.add(element);
         repaint();
     }

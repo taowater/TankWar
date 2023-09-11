@@ -2,6 +2,7 @@ package com.element;
 
 import com.game.Game;
 import com.game.Music;
+import com.history.core.util.stream.Ztream;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -67,14 +68,8 @@ public class Tank extends MoveElement {
 	}
 
 	// 判断是否撞上其他坦克
-    boolean isTouchOtherTanks() {
-		Vector<Tank> tanks = Game.stage.getAllTank();
-		for (Tank tank : tanks) {
-			if (tank != this && isTouch(tank)) {
-				return true;
-			}
-		}
-		return false;
+	boolean isTouchOtherTanks() {
+		return Ztream.of(Game.stage.getAllTank()).anyMatch(e -> e != this && isTouch(e));
 	}
 
 	private void stageAdd(Bullet bullet) {

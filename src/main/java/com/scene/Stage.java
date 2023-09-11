@@ -5,13 +5,17 @@ import com.element.inter.Draw;
 import com.element.map.Iron;
 import com.element.map.MapElement;
 import com.game.Game;
+import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.util.MusicUtil;
+import lombok.SneakyThrows;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Vector;
+import java.util.List;
 
 import static com.game.Game.edited;
 import static com.game.Game.tankWar;
@@ -27,7 +31,7 @@ public class Stage extends Scene {
     public int pausetime = 0;
     private int waittime = 64;
     // 玩家
-    public ArrayList<Player> players = new ArrayList<Player>();
+    public List<Player> players = new ArrayList<>();
 
     // 敌方坦克数量
     public int enumber = 6;
@@ -38,11 +42,11 @@ public class Stage extends Scene {
     // 子弹集合
     public final Vector<Bullet> bullets = new Vector<>();
     // 爆炸效果集合
-    public final Vector<Bomb> bombs = new Vector<>();
+    public final List<Bomb> bombs = new ArrayList<>();
     // 奖励集合
-    private final Vector<Reward> rewards = new Vector<>();
+    private final List<Reward> rewards = new ArrayList<>();
 
-    public final Vector<MapElement> elements = new Vector<>();
+    public final List<MapElement> elements = new ArrayList<>();
 
     private int overy = 32 * 13;
 
@@ -112,11 +116,8 @@ public class Stage extends Scene {
         }
     }
 
-    public Vector<Tank> getAllTank() {
-        Vector<Tank> tanks = new Vector<>();
-        tanks.addAll(players);
-        tanks.addAll(enemys);
-        return tanks;
+    public List<Tank> getAllTank() {
+        return Ztream.of(players).cast(Tank.class).append(enemys).toList();
     }
 
     private int[][] getGameMap() {
@@ -127,7 +128,7 @@ public class Stage extends Scene {
         return enemys;
     }
 
-    public Vector<Reward> getRewards() {
+    public List<Reward> getRewards() {
         return rewards;
     }
 
@@ -149,8 +150,10 @@ public class Stage extends Scene {
         for (int i = 0; i < cow; i++) {
             for (int j = 0; j < col; j++) {
                 if (map[i][j] > 0) {
-                    MapElement element = Game.creatMapElement(map[i][j], j * 16, i * 16);
-                    elements.add(element);
+                    MapElement element = Game.creatMapElement(map[i][j] - 1, j * 16, i * 16);
+                    if (Objects.nonNull(element)) {
+                        elements.add(element);
+                    }
                 }
             }
         }
@@ -186,22 +189,9 @@ public class Stage extends Scene {
     // 获取当前战场二维地图
     public int[][] getMap() {
         int[][] map = new int[getHeight() / 16][getWidth() / 16];
-        for (int i = 0; i < Game.getStage().elements.size(); i++) {
-            MapElement element = Game.getStage().elements.get(i);
-            int type = 0;
-            if (element.isTree) {
-                type = 1;
-            } else if (element.isSnow) {
-                type = 2;
-            } else if (element.isBrick) {
-                type = 3;
-            } else if (element.isWater) {
-                type = 4;
-            } else if (element.isIron) {
-                type = 5;
-            }
-            map[element.y / 16][element.x / 16] = type;
-        }
+        Ztream.of(Game.getStage().elements).forEach(e -> {
+            map[e.y / 16][e.x / 16] = e.getMapType().ordinal() + 1;
+        });
         return map;
     }
 
@@ -211,7 +201,7 @@ public class Stage extends Scene {
         if (tempTime - lastCreatEnemyTime >= 5 * 1000) {
             lastCreatEnemyTime = tempTime;
             int index = Game.Rand(3);
-            Vector<Tank> tanks = Game.stage.getAllTank();
+            List<Tank> tanks = Game.stage.getAllTank();
             for (Tank tank : tanks) {
                 if (new Rectangle(32 * 6 * index, 0, 32, 32).intersects(tank.getRect())) {
                     flag = true;
@@ -320,12 +310,14 @@ public class Stage extends Scene {
         }
     }
 
+    @Override
+    @SneakyThrows
     public void run() {
         while (true) {
             repaint();
             Game.Sleep(30);
             creatEnemy();
-            if (!fort.isLive || players.size() == 0) {
+            if (!fort.isLive || EmptyUtil.isEmpty(players)) {
                 Game.fail = true;
             }
             if (pausetime > 0) {
@@ -346,13 +338,8 @@ public class Stage extends Scene {
             }
             flag = Game.Reduce(flag, 0, 16, 1);
             if (!isLive) {
-                Robot robot;
-                try {
-                    robot = new Robot();
-                    robot.keyPress(KeyEvent.VK_SPACE);
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
+                Robot robot = new Robot();
+                robot.keyPress(KeyEvent.VK_SPACE);
                 break;
             }
         }

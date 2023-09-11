@@ -1,15 +1,18 @@
 package com.element;
 
 import com.ai.AStar;
+import com.element.enums.MapElementType;
 import com.element.map.Brick;
 import com.element.map.MapElement;
 import com.game.*;
+import com.history.core.util.Any;
+import com.history.core.util.stream.Ztream;
 import com.scene.Stage;
 import com.util.MusicUtil;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
 //子弹的类
 public class Bullet extends MoveElement {
@@ -30,6 +33,17 @@ public class Bullet extends MoveElement {
         init();
         MusicUtil.play("开始攻击");
     }
+
+    public static EnumMap<MapElementType, Boolean> GO_MAP = new EnumMap<>(MapElementType.class);
+
+    static {
+        GO_MAP.put(MapElementType.TREE, true);
+        GO_MAP.put(MapElementType.SNOW, true);
+        GO_MAP.put(MapElementType.BRICK, false);
+        GO_MAP.put(MapElementType.WATER, true);
+        GO_MAP.put(MapElementType.IRON, false);
+    }
+
 
     public void setCanGuaiWan(boolean flag) {
         this.canGuaiWan = flag;
@@ -98,7 +112,7 @@ public class Bullet extends MoveElement {
     }
 
     void bitTank() {
-        Vector<Tank> tanks = Game.getStage().getAllTank();
+        List<Tank> tanks = Game.getStage().getAllTank();
         for (Tank tank : tanks) {
             if (master != tank && isTouch(tank)) {
                 if (tank.isPlayer) {
@@ -140,13 +154,13 @@ public class Bullet extends MoveElement {
     }
 
     private MapElement[] getbBitElement() {
-        Vector<MapElement> elements = Game.getStage().elements;
+        List<MapElement> elements = Game.getStage().elements;
         MapElement[] elements_temp = new MapElement[3];
         int index = 0;
         int length = elements.size();
         for (int i = 0; i < length; i++) {
             MapElement element = elements.get(i);
-            if (isTouch(element) && element.isLive && !cango[element.type]) {
+            if (isTouch(element) && element.isLive && !Bullet.GO_MAP.get(element.getMapType())) {
                 isLive = false;
                 elements_temp[index++] = element;
             }
@@ -160,7 +174,7 @@ public class Bullet extends MoveElement {
     private void bitSmallBrick(MapElement[] elements, int begin) {
         for (int key = 0; key < elements.length; key++) {
             MapElement mapElement = elements[key];
-            if (mapElement != null && mapElement.isBrick) {
+            if (Any.of(mapElement).get(MapElement::getMapType) == MapElementType.BRICK) {
                 Brick brick = (Brick) mapElement;
                 for (int i = begin; i - begin < 2; i++) {
                     brick.flag[list[i]] = false;
@@ -174,15 +188,15 @@ public class Bullet extends MoveElement {
         if (elements != null) {
             if (direct > 3) {
                 for (MapElement mapElement : elements) {
-                    if (mapElement != null && !cango[mapElement.type]) {
-                        if(mapElement.type == 5){
-                            if(master.isPlayer){
+                    if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
+                        if (mapElement.getMapType() == MapElementType.IRON) {
+                            if (master.isPlayer) {
                                 Player player = (Player) master;
                                 if (player.level > 2) {
                                     mapElement.isLive = false;
                                 }
                             }
-                        }else{
+                        } else {
                             mapElement.isLive = false;
                         }
                     }
@@ -193,11 +207,11 @@ public class Bullet extends MoveElement {
                 for (int key = 0; key < elements.length; key++) {
                     MapElement mapElement = elements[key];
                     if (mapElement != null) {
-                        if (mapElement.isBrick) {
+                        if (mapElement.getMapType() == MapElementType.BRICK) {
                             isSmallElementLive[key] = true;
                             Brick brick = (Brick) mapElement;
                             isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
-                        } else if (mapElement.isIron) {
+                        } else if (mapElement.getMapType() == MapElementType.IRON) {
                             if (master.isPlayer) {
                                 Player player = (Player) master;
                                 if (player.level > 2) {
@@ -340,29 +354,28 @@ class Laser extends Bullet {
     }
 
     private void Length() {
-        for (int i = 0; i < Game.getStage().elements.size(); i++) {
-            MapElement element = Game.getStage().elements.get(i);
-            if (isTouch(element) && !cango[element.type]) {
+        Ztream.of(Game.getStage().elements).forEach(e->{
+            if (isTouch(e) && !Bullet.GO_MAP.get(e.getMapType())) {
                 switch (direct) {
-                    case 0:
-                        height = master.y - (element.y + element.height);
+                    case 0 -> {
+                        height = master.y - (e.y + e.height);
                         this.y = master.y - height;
-                        break;
-                    case 2:
-                        height = element.y - (master.y + master.height);
+                    }
+                    case 2 -> {
+                        height = e.y - (master.y + master.height);
                         this.y = master.y + 32;
-                        break;
-                    case 1:
-                        width = element.x - (master.x + master.width);
+                    }
+                    case 1 -> {
+                        width = e.x - (master.x + master.width);
                         this.x = master.x + 32;
-                        break;
-                    case 3:
-                        width = master.x - (element.x + element.width);
+                    }
+                    case 3 -> {
+                        width = master.x - (e.x + e.width);
                         this.x = master.x - width;
-                        break;
+                    }
                 }
             }
-        }
+        });
     }
 }
 

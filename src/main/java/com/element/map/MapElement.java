@@ -3,22 +3,20 @@ package com.element.map;
 import com.element.ElementOld;
 import com.element.enums.MapElementType;
 import com.game.Game;
+import lombok.Getter;
 
 import java.awt.*;
 
 public class MapElement extends ElementOld {
 
-    public boolean isTree = false;
-    public boolean isSnow = false;
-    public boolean isBrick = false;
-    public boolean isWater = false;
-    public boolean isIron = false;
-    public MapElementType type2 = MapElementType.BRICK;
-    public int type = 1;
-    public MapElement(int x, int y) {
+    @Getter
+    public MapElementType mapType;
+    public MapElement(int x, int y,MapElementType mapType) {
         super(x, y);
         this.width = 16;
         this.height = 16;
+        this.mapType = mapType;
+        getImage(mapType.ordinal() + 1);
     }
 
     public void getImage(int i) {

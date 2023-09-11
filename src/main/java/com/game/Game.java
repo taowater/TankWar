@@ -1,6 +1,7 @@
 package com.game;
 
 import com.element.map.*;
+import com.history.core.util.Any;
 import com.scene.Stage;
 import lombok.SneakyThrows;
 
@@ -19,13 +20,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
 public class Game {
 
     public static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
+    public static final Map<Integer, int[][]> MAP_CACHE = new ConcurrentHashMap<>(0);
 
     public static final BufferedImage materialImage = Game.getMaterial("material");
 
@@ -109,7 +110,7 @@ public class Game {
     public static java.util.List<Brick> getLogo(int key) {
         int[][] map = Game.getMap(0);
         int length = map[0].length;
-        ArrayList<Brick> logo = new ArrayList<>();
+        List<Brick> logo = new ArrayList<>();
         for (int i = 0; i + 1 < 12; i += 2) {
             for (int j = 0; j + 1 < length; j += 2) {
                 Brick brick = new Brick(24 + j * 8, 64 + 16 + i * 8);
@@ -126,7 +127,6 @@ public class Game {
     }
 
     public static final List<BiFunction<Integer, Integer, MapElement>> mapBuilder = List.of(
-            Brick::new,
             Tree::new,
             Snow::new,
             Brick::new,
@@ -136,7 +136,7 @@ public class Game {
 
     public static MapElement creatMapElement(int type, int x, int y) {
         var fun = mapBuilder.get(type);
-        return fun.apply(x, y);
+        return Any.of(fun).get( f->f.apply(x, y));
     }
 
     @SneakyThrows
@@ -145,12 +145,16 @@ public class Game {
         return URLDecoder.decode(realPath, StandardCharsets.UTF_8);
     }
 
-    @SneakyThrows
     public static int[][] getMap(int stage) {
+       return  MAP_CACHE.computeIfAbsent(stage,Game::doGetMap);
+    }
+
+    @SneakyThrows
+    public static int[][] doGetMap(int stage) {
         int[][] map;
         int length = 0;
         int length2 = 0;
-        String string = "";
+        StringBuilder string = new StringBuilder();
         String str = "";
         String name = MessageFormat.format("map/map{0}.txt", stage);
 
@@ -161,13 +165,13 @@ public class Game {
                     break;
                 }
                 length = str.length();
-                string += str;
+                string.append(str);
                 length2++;
             }
         }
 
         int index = 0;
-        char[] mapchar = string.toCharArray();
+        char[] mapchar = string.toString().toCharArray();
         map = new int[length2][length];
         int cow = length2;
         int col = length;
