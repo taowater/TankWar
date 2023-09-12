@@ -53,13 +53,13 @@ public class Laser extends Bullet {
             }
         } else {
             getMaster().decrBulletNum();
-            Game.getStage().bullets.remove(this);
+            Game.getStage().elements.remove(this);
         }
     }
 
     private void length() {
         Tank master = getMaster();
-        Ztream.of(Game.getStage().elements).forEach(e -> {
+        Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
             if (isTouch(e) && !Bullet.GO_MAP.get(e.getMapType())) {
                 int eX = e.getX();
                 int eY = e.getY();

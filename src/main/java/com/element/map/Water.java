@@ -2,6 +2,7 @@ package com.element.map;
 
 import com.element.enums.MapElementType;
 import com.game.Game;
+import com.util.RangeUtil;
 
 import java.awt.*;
 
@@ -18,11 +19,7 @@ public class Water extends MapElement {
         if (getIsLive()) {
             setImage(Game.getMaterial("map").getSubimage(3 * 16, (flag % 2) * 16, 16, 16));
             g.drawImage(getImage(), getX(), getY(), 16, 16, Game.getStage());
-            if (flag < 4) {
-                flag++;
-            } else {
-                flag = 0;
-            }
+            flag = RangeUtil.right(0, flag, 4);
         }
     }
 }

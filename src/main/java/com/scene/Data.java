@@ -2,6 +2,7 @@ package com.scene;
 
 import com.element.tank.Player;
 import com.game.Game;
+import com.history.core.util.stream.Ztream;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -30,10 +31,9 @@ public class Data extends Scene {
 //		for (int i = 0; i < stage.enumber; i++) {
 //			g.drawImage(enemyIcon, 16 + i % 2 * 16, 16 + i / 2 * 16, 16, 16, this);
 //		}
-        for (int i = 0; i < Game.player_number; i++) {
-            Player player = Game.stage.players.get(i);
-            drawPlayer(player, g, i);
-        }
+        Ztream.of(Game.stage.getPlayers()).forEach((e,i)->{
+            drawPlayer(e, g, i);
+        });
 
         BufferedImage qizhi = Game.materialImage.getSubimage(192, 64, 32, 32);
         g.drawImage(qizhi, 16, 32 * 11 - 16, 32, 32, this);

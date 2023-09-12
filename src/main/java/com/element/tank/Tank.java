@@ -87,11 +87,11 @@ public class Tank extends MoveElement {
 
     // 判断是否撞上其他坦克
     boolean isTouchOtherTanks() {
-        return Ztream.of(Game.stage.getAllTank()).anyMatch(e -> e != this && isTouch(e));
+        return Ztream.of(Game.stage.getTanks()).anyMatch(e -> e != this && isTouch(e));
     }
 
     private void stageAdd(Bullet bullet) {
-        Game.getStage().bullets.add(bullet);
+        Game.getStage().elements.add(bullet);
         bulletNum++;
     }
 
@@ -124,9 +124,9 @@ public class Tank extends MoveElement {
         if (bulletNum < maxbuttle) {
             if (bulletType == 0) {
                 creatBullet(getDirect());
-            } else if (bulletType == 1)
+            } else if (bulletType == 1) {
                 creatLaser();
-            else if (bulletType == 2) {
+            } else if (bulletType == 2) {
                 creatBullet(getDirect());
                 creatBullet(Direct.get(getDirect().ordinal() + 4));
                 int directTemp = (getDirect().ordinal() + 5) < 8 ? getDirect().ordinal() + 5 : 4;

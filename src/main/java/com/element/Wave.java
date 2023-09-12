@@ -7,6 +7,7 @@ import com.history.core.util.stream.Ztream;
 
 import java.awt.Graphics;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class Wave extends Bullet {
@@ -39,16 +40,15 @@ public class Wave extends Bullet {
     }
 
     @Override
-    public void bitTank() {
-        List<Enemy> tanks = Game.getStage().getEnemys();
-        Ztream.of(Game.getStage().getRewards()).forEach(e -> {
-        });
-
-        for (Tank tank : tanks) {
-            if (this.isTouch(tank)) {
-                tank.setIsLive(false);
+    public boolean bitTank() {
+        AtomicBoolean flag = new AtomicBoolean(false);
+        Ztream.of(Game.getStage().getEnemys()).parallel().forEach(e -> {
+            if (isTouch(e)) {
+                e.setIsLive(false);
+                flag.set(true);
             }
-        }
+        });
+        return flag.get();
     }
 
     @Override
@@ -60,11 +60,12 @@ public class Wave extends Bullet {
                 bitTank();
                 if (getReach() > 0) {
                     setReach(getReach() - 1);
-                } else
+                } else {
                     setIsLive(false);
+                }
             }
         } else {
-            Game.getStage().bullets.remove(this);
+            Game.getStage().getBullets().remove(this);
             getMaster().decrBulletNum();
         }
     }

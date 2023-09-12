@@ -17,9 +17,9 @@ import java.util.List;
 public class Enemy extends Tank {
 
     private int target = 0;
-    private  int type;
+    private int type;
     // 定义是否能行动的布尔变量
-    private  int mask = 0;
+    private int mask = 0;
     private int flashtime;
     private Boolean imageFlag = false;
     private Boolean withReward;
@@ -55,59 +55,60 @@ public class Enemy extends Tank {
         int offset = imageFlag ? 1 : 0;
         setImage(Game.getMaterial("enemy").getSubimage(type * 28 * 4 + offset * 28, getDirect().ordinal() * 28, 28, 28));
         imageFlag = !imageFlag;
-        if (getIsLive()) {
-            if (withReward) {
-                if (flashtime > 1) {
-                    setImage(Game.getMaterial("enemy").getSubimage(type * 28 * 4 + 2 * 28, getDirect().ordinal() * 28, 28, 28));
-                }
+        if (withReward) {
+            if (flashtime > 1) {
+                setImage(Game.getMaterial("enemy").getSubimage(type * 28 * 4 + 2 * 28, getDirect().ordinal() * 28, 28, 28));
             }
-            super.draw(g);
-            if (!Game.pause && Game.stage.pausetime == 0) {
-                if (getX() % 16 == 0 && getY() % 16 == 0) {
-                    setOldXY();
-                    setGoing(false);
-                } else
-                    setGoing(true);
-                if (!star.getIsLive()) {
-                    switch (type) {
-                        case 0 -> {
+        }
+        super.draw(g);
+        if (!Game.pause && Game.stage.pausetime == 0) {
+            if (getX() % 16 == 0 && getY() % 16 == 0) {
+                setOldXY();
+                setGoing(false);
+            } else {
+                setGoing(true);
+            }
+            if (!star.getIsLive()) {
+                switch (type) {
+                    case 0 -> {
+                        randomGo();
+                        if (Game.Rand(60) == 1) {
+                            shoot();
+                        }
+                    }
+                    case 1 -> {
+                        if (getY() / 16 < 24) {
+                            goToFort();
+                        } else {
                             randomGo();
-                            if (Game.Rand(60) == 1) {
-                                shoot();
-                            }
                         }
-                        case 1 -> {
-                            if (getY() / 16 < 24) {
-                                goToFort();
-                            } else {
-                                randomGo();
-                            }
-                            if (canBit(Game.stage.fort) && Game.Rand(30) == 1) {
-                                shoot();
-                            }
+                        if (canBit(Game.stage.fort) && Game.Rand(30) == 1) {
+                            shoot();
                         }
-                        case 2 -> {
-                            randomGo();
-                            if (canBit(Game.stage.players.get(Game.Rand(1))) && Game.Rand(50) == 1) {
-                                shoot();
-                            }
+                    }
+                    case 2 -> {
+                        randomGo();
+                        if (canBit(Game.stage.getPlayers().get(Game.Rand(1))) && Game.Rand(50) == 1) {
+                            shoot();
                         }
-                        case 3 -> {
-                            trackMove();
-                            if (canBit(Game.stage.players.get(Game.Rand(1))) && Game.Rand(10) == 1) {
-                                shoot();
-                            }
+                    }
+                    case 3 -> {
+                        trackMove();
+                        if (canBit(Game.stage.getPlayers().get(Game.Rand(1))) && Game.Rand(10) == 1) {
+                            shoot();
                         }
                     }
                 }
             }
-        } else {
-            Game.stage.enumber--;
-            BigBomb bigbomb = new BigBomb(getX(), getY());
-            Game.getStage().bombs.add(bigbomb);
-            Game.getStage().getEnemys().remove(this);
         }
         flashtime = Game.Reduce(flashtime, 0, 3, 1);
+    }
+
+    public void death() {
+        setIsLive(false);
+        Game.stage.enumber--;
+        BigBomb bigbomb = new BigBomb(getX(), getY());
+        Game.getStage().elements.add(bigbomb);
     }
 
     // 判断能否击中玩家
@@ -117,11 +118,11 @@ public class Enemy extends Tank {
             int y = getY();
             Direct direct = getDirect();
             if (getX() == element.getX()) {
-                if ((y > element.getY() && direct == Direct.UP) || ( y <element.getY() && direct == Direct.DOWN)) {
+                if ((y > element.getY() && direct == Direct.UP) || (y < element.getY() && direct == Direct.DOWN)) {
                     return true;
                 }
             } else if (y == element.getY()) {
-                if ((getX()< element.getX() && direct == Direct.RIGHT) || (x > element.getX() && direct == Direct.LEFT)) {
+                if ((getX() < element.getX() && direct == Direct.RIGHT) || (x > element.getX() && direct == Direct.LEFT)) {
                     return true;
                 }
             }
@@ -131,8 +132,8 @@ public class Enemy extends Tank {
 
     // 追袭玩家
     private void trackMove() {
-        if (EmptyUtil.isNotEmpty(Game.stage.players)) {
-            Player player = Game.stage.players.get(0);
+        if (EmptyUtil.isNotEmpty(Game.stage.getPlayers())) {
+            Player player = Game.stage.getPlayers().get(0);
             if (player != null && player.getIsLive()) {
                 int i = player.getY() / 16;
                 int j = player.getX() / 16;
@@ -158,14 +159,14 @@ public class Enemy extends Tank {
 
     // 偷袭碉堡
     private void goToFort() {
-        if (Game.stage.fort.getIsLive()) {
-            Fort fort = Game.stage.fort;
+        Fort fort = Game.stage.fort;
+        if (fort.getIsLive()) {
             if (!getGoing()) {
                 int[][] currenMap = getCurrentMap(Game.tankcango);
                 List<Point> path = new AStar(currenMap, getY() / 16, getX() / 16, 24, target).search();
                 if (EmptyUtil.isNotEmpty(path)) {
                     Point point = path.get(path.size() - 1);
-                    this.setDirect( getNextStep(point.x, point.y));
+                    this.setDirect(getNextStep(point.x, point.y));
                 }
             }
             move();
@@ -182,7 +183,7 @@ public class Enemy extends Tank {
         move();
         if (isTouchOtherTanks() || isTouchWall()) {
             stay();
-            Direct newDirect = Game.Rand(2) > 0 ? Direct.getR(getDirect()) :Direct.  getL(getDirect());
+            Direct newDirect = Game.Rand(2) > 0 ? Direct.getR(getDirect()) : Direct.getL(getDirect());
             setDirect(newDirect);
         }
     }

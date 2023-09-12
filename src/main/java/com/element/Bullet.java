@@ -14,14 +14,12 @@ import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.scene.Stage;
 import com.util.MusicUtil;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //子弹的类
 @Data
@@ -77,82 +75,90 @@ public class Bullet extends MoveElement {
     @Override
     public void draw(Graphics g) {
         setImage(Game.getMaterial("bullet").getSubimage(getDirect().ordinal() * 16, 0, 16, 16));
-        if (getIsLive()) {
-            if (!isTouch(master))
-                g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());
-            if (!Game.pause) {
-                if (!isInStage()) {
-                    setIsLive(false);
-                }
-                setOldXY();
-                normalFly();
-                if (canTurn)
-                    guaiwan();
-                bitFort(Game.stage.fort);
-                bitBullet();
-                bitTank();
-                bitBrick();
-                if (reach > 0) {
-                    reach--;
-                } else {
-                    setIsLive(false);
-                }
-            }
+
+        if (!isTouch(master)) {
+            g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());
+        }
+        if (Game.pause) {
+            return;
+        }
+        if (!isInStage()) {
+            death();
+        }
+        setOldXY();
+        normalFly();
+        if (canTurn) {
+            guaiwan();
+        }
+        if(bitFort(Game.stage.fort) || bitTank() ||bitBrick() ||bitBullet()){
+            death();
+        }
+        if (reach > 0) {
+            reach--;
         } else {
-            Game.getStage().bullets.remove(this);
-            master.decrBulletNum();
-            Bomb bomb = new Bomb(getX(), getY());
-            Game.getStage().bombs.add(bomb);
+            death();
         }
     }
 
-    private void bitFort(Fort fort) {
+    public void death() {
+        this.setIsLive(false);
+        master.decrBulletNum();
+        Bomb bomb = new Bomb(getX(), getY());
+        Game.getStage().elements.add(bomb);
+    }
+
+
+    private boolean bitFort(Fort fort) {
         if (isTouch(fort) && fort.getIsLive()) {
             fort.setIsLive(false);
-            setIsLive(false);
+            return true;
         }
+        return false;
     }
 
-    private void bitBullet() {
-        for (int i = 0; i < Game.getStage().bullets.size(); i++) {
-            Bullet bullet = Game.getStage().bullets.get(i);
-            if (this != bullet && this.master != bullet.master && isTouch(bullet)) {
-                setIsLive(false);
-                bullet.setIsLive(false);
+    private boolean bitBullet() {
+        AtomicBoolean flag = new AtomicBoolean(false);
+        Ztream.of(Game.getStage().getBullets()).parallel().forEach(b -> {
+            if (this != b && this.master != b.master && isTouch(b)) {
+                b.death();
+                flag.set(true);
             }
-        }
+        });
+        return flag.get();
     }
 
-    void bitTank() {
-        List<Tank> tanks = Game.getStage().getAllTank();
-        for (Tank tank : tanks) {
-            if (master != tank && isTouch(tank)) {
-                if (tank instanceof Player player) {
-                    player.decrMaxLife();
-                    player.setIsLive(false);
-                    setIsLive(false);
-                } else if (tank instanceof Enemy enemy) {
-                    if (master instanceof Player player) {
-                        if (Game.stage.players.size() < 2) {
+    protected boolean bitTank() {
+        AtomicBoolean flag = new AtomicBoolean(false);
+        Ztream.of(Game.getStage().getTanks()).forEach(tank -> {
+            if (master == tank || !isTouch(tank)) {
+                return;
+            }
+            if (tank instanceof Player player) {
+                player.decrMaxLife();
+                player.setIsLive(false);
+                flag.set(true);
+            } else if (tank instanceof Enemy enemy) {
+                if (master instanceof Player player) {
+                    if (Game.stage.getPlayers().size() < 2) {
+                        Stage.CountData.level[enemy.getType()]++;
+                    } else {
+                        if (master == Game.stage.getPlayers().get(0)) {
                             Stage.CountData.level[enemy.getType()]++;
                         } else {
-                            if (master == Game.stage.players.get(0)) {
-                                Stage.CountData.level[enemy.getType()]++;
-                            } else {
-                                Stage.CountData.level2[enemy.getType()]++;
-                            }
-                        }
-                        enemy.setIsLive(false);
-                        setIsLive(false);
-                        enemy.setBitdead(true);
-                        player.setScore(player.getScore() + enemy.getMask());
-                        if (enemy.getWithReward()) {
-                            Game.stage.creatReward();
+                            Stage.CountData.level2[enemy.getType()]++;
                         }
                     }
+                    enemy.death();
+                    enemy.setBitdead(true);
+                    player.setScore(player.getScore() + enemy.getMask());
+                    if (enemy.getWithReward()) {
+                        Game.stage.creatReward();
+                    }
+                    flag.set(true);
                 }
             }
-        }
+        });
+        return flag.get();
     }
 
     public Rectangle getRect() {
@@ -163,15 +169,14 @@ public class Bullet extends MoveElement {
     }
 
     private MapElement[] getbBitElement() {
-        List<MapElement> elements = Game.getStage().elements;
+        List<MapElement> elements = Game.getStage().getMapElements();
         MapElement[] elements_temp = new MapElement[3];
         int index = 0;
         int length = elements.size();
-        for (int i = 0; i < length; i++) {
-            MapElement element = elements.get(i);
+        for (MapElement element : elements) {
             if (isTouch(element) && element.getIsLive() && !Bullet.GO_MAP.get(element.getMapType())) {
-                setIsLive(false);
                 elements_temp[index++] = element;
+                death();
             }
             if (index > 2) {
                 break;
@@ -190,17 +195,20 @@ public class Bullet extends MoveElement {
         });
     }
 
-    private void bitBrick() {
+    private boolean bitBrick() {
         MapElement[] elements = getbBitElement();
+        boolean flag = false;
         if (getDirect().ordinal() > 3) {
             for (MapElement mapElement : elements) {
                 if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
                     if (mapElement instanceof Iron) {
                         if (master instanceof Player player && player.getLevel() > 2) {
                             mapElement.setIsLive(false);
+                            flag =  true;
                         }
                     } else {
                         mapElement.setIsLive(false);
+                        flag =  true;
                     }
                 }
             }
@@ -211,21 +219,20 @@ public class Bullet extends MoveElement {
                 MapElement mapElement = elements[key];
                 if (mapElement != null) {
                     if (mapElement instanceof Brick brick) {
-                        isSmallElementLive[key] = true;
                         isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
                     } else if (mapElement instanceof Iron) {
                         if (master instanceof Player player) {
                             if (player.getLevel() > 2) {
                                 mapElement.setIsLive(false);
+                                return true;
                             }
                         }
                     }
                 }
-
             }
-            boolean flag = false;
-            for (int i = 0; i < isSmallElementLive.length; i++) {
-                if (isSmallElementLive[i]) {
+
+            for (boolean b : isSmallElementLive) {
+                if (b) {
                     flag = true;
                 }
             }
@@ -235,6 +242,7 @@ public class Bullet extends MoveElement {
                 bitSmallBrick(elements, 2);
             }
         }
+        return flag;
     }
 
     private void normalFly() {

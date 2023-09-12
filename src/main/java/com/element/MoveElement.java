@@ -2,12 +2,9 @@ package com.element;
 
 import com.element.enums.Direct;
 import com.element.enums.MapElementType;
-import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.EnumMap;
 
@@ -67,22 +64,23 @@ public abstract class MoveElement extends ElementOld {
                 }
             }
         }
-        for (Tank tank : Game.getStage().getAllTank()) {
-            if (tank != this) {
-                int m = tank.getY() / 16;
-                int n = tank.getX() / 16;
-                map[m][n] = 1;
-                if (n + 1 < map[0].length) {
-                    map[m][n + 1] = 1;
-                }
-                if (m + 1 < map.length) {
-                    map[m + 1][n] = 1;
-                }
-                if (n + 1 < map[0].length && m + 1 < map.length) {
-                    map[m + 1][n + 1] = 1;
-                }
+        Ztream.of(Game.getStage().getTanks()).forEach(tank -> {
+            if (tank == this) {
+                return;
             }
-        }
+            int m = tank.getY() / 16;
+            int n = tank.getX() / 16;
+            map[m][n] = 1;
+            if (n + 1 < map[0].length) {
+                map[m][n + 1] = 1;
+            }
+            if (m + 1 < map.length) {
+                map[m + 1][n] = 1;
+            }
+            if (n + 1 < map[0].length && m + 1 < map.length) {
+                map[m + 1][n + 1] = 1;
+            }
+        });
         return map;
     }
 
@@ -100,7 +98,7 @@ public abstract class MoveElement extends ElementOld {
     }
 
     public boolean isTouchWall() {
-        return Ztream.of(Game.getStage().elements).anyMatch(e -> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
+        return Ztream.of(Game.getStage().getMapElements()).anyMatch(e -> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
     }
 
     public Direct getNextStep(int i, int j) {

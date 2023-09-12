@@ -38,6 +38,8 @@ public class ElementOld implements Draw {
         this.isLive = true;
     }
 
+
+
     public boolean isInStage() {
         return x >= 0 && x <= Game.stage.getWidth() - width && y >= 0 && y <= Game.stage.getHeight() - height;
     }

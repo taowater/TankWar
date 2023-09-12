@@ -75,7 +75,7 @@ public class Count extends Scene {
                 Game.drawText(sum + "", 128 + 48 + x, 32 * 9 + 16 * 4, 2, g, this);
                 repaint();
             }
-            if(Game.stage.players.size()>1){
+            if(Game.stage.getPlayers().size()>1){
                 if (lev2[index] == level2[index]) {
                     Game.drawText(sum2 + "", 128 + 48 + 96 + x, 32 * 9 + 16 * 4, 2, g, this);
                     repaint();

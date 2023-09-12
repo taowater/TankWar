@@ -18,11 +18,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Vector;
 import java.util.List;
 
-import static com.game.Game.edited;
-import static com.game.Game.tankWar;
+import static com.game.Game.*;
 
 public class Stage extends Scene {
 
@@ -34,23 +32,13 @@ public class Stage extends Scene {
     private int width, height;
     public int pausetime = 0;
     private int waittime = 64;
-    // 玩家
-    public List<Player> players = new ArrayList<>();
 
     // 敌方坦克数量
     public int enumber = 6;
     private long lastCreatEnemyTime = 0;
     public Fort fort;
-    // 敌方坦克集合
-    private final Vector<Enemy> enemys = new Vector<>();
-    // 子弹集合
-    public final Vector<Bullet> bullets = new Vector<>();
-    // 爆炸效果集合
-    public final List<Bomb> bombs = new ArrayList<>();
-    // 奖励集合
-    private final List<Reward> rewards = new ArrayList<>();
 
-    public final List<MapElement> elements = new ArrayList<>();
+    public final List<ElementOld> elements = new ArrayList<>();
 
     private int overy = 32 * 13;
 
@@ -64,13 +52,11 @@ public class Stage extends Scene {
     }
 
     private void drawElements(Graphics g) {
-        Ztream.of(elements).cast(Draw.class).append(fort).append(players).append(enemys).append(bullets).append(bombs).append(rewards).forEach(e -> e.draw(g));
+        Ztream.of(elements).cast(Draw.class).append(fort).forEach(e -> e.draw(g));
     }
 
     private void removeDeath() {
-        bombs.removeIf(e -> !e.getIsLive());
-        rewards.removeIf(e -> !e.getIsLive());
-        elements.removeIf(e ->  !e.getIsLive());
+        elements.removeIf(e -> !e.getIsLive());
     }
 
     private void drawGame(Graphics g) {
@@ -91,13 +77,14 @@ public class Stage extends Scene {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
+        removeDeath();
         drawElements(g);
-        Ztream.of(players).forEach(e -> {
+        Ztream.of(getPlayers()).forEach(e -> {
             if (Game.fogFlag) {
                 drawFog(e, g);
             }
         });
-        removeDeath();
+
         drawGame(g);
 
     }
@@ -118,24 +105,40 @@ public class Stage extends Scene {
             Player player = new Player(32 * 4 + i * 3 * 32 + 32 * i, 32 * 12, Direct.UP);
             player.setDIRECTKEY(Game.PlayerDIRECT[i]);
             player.setImage(i + 1);
-            players.add(player);
+            elements.add(player);
         }
     }
 
-    public List<Tank> getAllTank() {
-        return Ztream.of(players).cast(Tank.class).append(enemys).toList();
+    public List<Tank> getTanks() {
+        return getElements(Tank.class);
     }
 
     private int[][] getGameMap() {
         return Game.getMap(Game.stagesth);
     }
 
-    public Vector<Enemy> getEnemys() {
-        return enemys;
+    public List<Enemy> getEnemys() {
+        return getElements(Enemy.class);
+    }
+
+    public List<Bullet> getBullets() {
+        return getElements(Bullet.class);
     }
 
     public List<Reward> getRewards() {
-        return rewards;
+        return getElements(Reward.class);
+    }
+
+    public List<Player> getPlayers() {
+        return getElements(Player.class);
+    }
+
+    private <E extends ElementOld> List<E> getElements(Class<E> clazz) {
+        return Ztream.of(elements).filter(e -> clazz.isAssignableFrom(e.getClass())).cast(clazz).toList();
+    }
+
+    public List<MapElement> getMapElements() {
+        return getElements(MapElement.class);
     }
 
     private void setGameMap() {
@@ -195,7 +198,7 @@ public class Stage extends Scene {
     // 获取当前战场二维地图
     public int[][] getMap() {
         int[][] map = new int[getHeight() / 16][getWidth() / 16];
-        Ztream.of(Game.getStage().elements).forEach(e -> {
+        Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
             map[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1;
         });
         return map;
@@ -207,35 +210,30 @@ public class Stage extends Scene {
         if (tempTime - lastCreatEnemyTime >= 5 * 1000) {
             lastCreatEnemyTime = tempTime;
             int index = Game.Rand(3);
-            List<Tank> tanks = Game.stage.getAllTank();
+            List<Tank> tanks = Game.stage.getTanks();
             for (Tank tank : tanks) {
                 if (new Rectangle(32 * 6 * index, 0, 32, 32).intersects(tank.getRect())) {
                     flag = true;
                     break;
                 }
             }
-            if (!flag && enumber - enemys.size() > 0) {
+            if (!flag && enumber - getEnemys().size() > 0) {
                 Enemy enemytank = new Enemy(32 * 6 * index, 0, Game.Rand(4), Direct.DOWN);
                 if (Game.Rand(5) > 3) {
                     enemytank.setWithReward(true);
                 }
-                enemys.add(enemytank);
+                elements.add(enemytank);
             }
         }
     }
 
     public void dispose() {
-        for (Tank tank : getAllTank()) {
-            tank.setIsLive(false);
-        }
-        for (Bullet bullet : bullets) {
-            bullet.setIsLive(false);
-        }
+        Ztream.of(getTanks()).cast(ElementOld.class).append(getBullets()).forEach(e -> e.setIsLive(false));
     }
 
     public void creatReward() {
         Reward reward = new Reward(Game.Rand(6), Game.Rand(width - 32), Game.Rand(height - 32));
-        rewards.add(reward);
+        elements.add(reward);
     }
 
     public void Reward(Player player, Reward reward) {
@@ -254,7 +252,7 @@ public class Stage extends Scene {
                 break;
             case 1:
                 if (player.getLevel() < 4) {
-                    player.setLevel(player.getLevel()+1);
+                    player.setLevel(player.getLevel() + 1);
                 }
                 break;
             case 2:
@@ -265,12 +263,10 @@ public class Stage extends Scene {
                 player.flash.setIsLive(false);
                 break;
             case 4:
-                for (Enemy enemy : enemys) {
-                    enemy.setIsLive(false);
-                }
+                Ztream.of(getEnemys()).parallel().forEach(e -> e.setIsLive(false));
                 break;
             case 5:
-                player.setMaxlife(player.getMaxlife()+1);
+                player.setMaxlife(player.getMaxlife() + 1);
                 break;
         }
     }
@@ -302,18 +298,12 @@ public class Stage extends Scene {
         } else if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
             Game.fogFlag = !Game.fogFlag;
         } else {
-            for (int i = 0; i < players.size(); i++) {
-                Player player = players.get(i);
-                player.KeyPressed(e);
-            }
+            Ztream.of(getPlayers()).forEach(p -> p.KeyPressed(e));
         }
     }
 
     public void keyReleased(KeyEvent e) {
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            player.keyReleased(e);
-        }
+        Ztream.of(getPlayers()).forEach(p -> p.keyReleased(e));
     }
 
     @Override
@@ -323,7 +313,7 @@ public class Stage extends Scene {
             repaint();
             Game.Sleep(30);
             creatEnemy();
-            if (!fort.getIsLive() || EmptyUtil.isEmpty(players)) {
+            if (!fort.getIsLive() || EmptyUtil.isEmpty(getPlayers())) {
                 Game.fail = true;
             }
             if (pausetime > 0) {
@@ -332,7 +322,7 @@ public class Stage extends Scene {
             if (starttime > 0) {
                 starttime--;
             }
-            if (enumber == 0 && enemys.size() == 0) {
+            if (enumber == 0 && EmptyUtil.isEmpty(getEnemys())) {
                 over = true;
             }
             if (overy == height / 2 - 16 || over) {

@@ -111,15 +111,14 @@ public class Player extends Tank {
     }
 
     void clearBrick() {
-        for (int i = 0; i < Game.getStage().elements.size(); i++) {
-            MapElement element = Game.getStage().elements.get(i);
-            if (isTouch(element)) {
-                if (element.getMapType() == MapElementType.BRICK) {
+        Ztream.of(Game.getStage().getMapElements()).forEach(e->{
+            if (isTouch(e)) {
+                if (e.getMapType() == MapElementType.BRICK) {
                     MusicUtil.play("移动");
-                    Game.getStage().elements.remove(element);
+                    Game.getStage().elements.remove(e);
                 }
             }
-        }
+        });
     }
 
     void Reborn() {
