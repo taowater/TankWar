@@ -9,6 +9,7 @@ import com.element.tank.Enemy;
 import com.element.tank.Player;
 import com.element.tank.Tank;
 import com.game.Game;
+import com.game.TankWar;
 import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.util.MusicUtil;
@@ -93,8 +94,8 @@ public class Stage extends Scene {
         setLayout(null);
         setGameMap();
         setBounds(32, 32, width, height);
-        int width_temp = (tankWar.WIDTH > width + 32 * 4 - 16) ? tankWar.WIDTH : width + 32 * 4 - 16;
-        tankWar.setSize(width_temp, tankWar.HEIGHT);
+        int width_temp = Math.max(TankWar.WIDTH, width + 32 * 4 - 16);
+        tankWar.setSize(width_temp, TankWar.HEIGHT);
         isLive = true;
         setPlayer();
         MusicUtil.start();
