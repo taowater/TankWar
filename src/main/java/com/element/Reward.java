@@ -17,15 +17,15 @@ public class Reward extends ElementOld {
 		super(x, y);
 		this.id = id;
 		this.time = 3;
-		this.life = 320;
+		this.setLife(320);
 		this.isDraw = true;
 		MusicUtil.play("奖励");
 	}
 
 	@Override
     public void draw(Graphics g) {
-		image = Game.getMaterial("material").getSubimage(32 * id, 64, 32, 32);
-		if (life > 0 && isDraw) {
+		setImage(Game.getMaterial("material").getSubimage(32 * id, 64, 32, 32));
+		if (getLife() > 0 && isDraw) {
 			super.draw(g);
 		}
 		time--;

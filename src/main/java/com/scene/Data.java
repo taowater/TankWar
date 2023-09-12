@@ -1,9 +1,7 @@
 package com.scene;
 
-import com.element.Player;
+import com.element.tank.Player;
 import com.game.Game;
-import com.scene.Scene;
-import com.scene.Stage;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -49,7 +47,7 @@ public class Data extends Scene {
 
         g.drawImage(hero, 16, 72 + 128 * i, 32, 16, this);
         g.drawImage(tank, 16, 72 + 128 * i + 32, 15, 16, this);
-        Game.drawText(player.maxlife + "", 16, 72 + 128 * i + 32, 0, g, this);
+        Game.drawText(player.getMaxlife() + "", 16, 72 + 128 * i + 32, 0, g, this);
         g.drawImage(bullet, 16 + 2, 72 + 128 * i + 64, 12, 16, this);
         Game.drawText(player.bulletType + 1 + "", 32, 72 + 128 * i + 64 + 2, 0, g, this);
     }

@@ -1,41 +1,32 @@
 package com.element;
 
+import com.element.enums.Direct;
 import com.element.enums.MapElementType;
+import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.EnumMap;
 
 // 可移动元素块的类
-public class MoveElement extends ElementOld {
-    public static final int UP = 0;
-    public static final int RIGHT = 1;
-    public static final int DOWN = 2;
-    public static final int LEFT = 3;
-    public static final int LEFT_UP = 4;
-    public static final int RIGHT_UP = 5;
-    public static final int RIGHT_DOWN = 6;
-    public static final int LEFT_DOWN = 7;
-    int oldx, oldy;
+@Data
+public abstract class MoveElement extends ElementOld {
+
+    private int oldX;
+    private int oldY;
     // 方向
-    int direct;
-    int speed;
+    private Direct direct;
+    private int speed;
 
-    @Getter
-    EnumMap<MapElementType, Boolean> cango;
-    boolean going = false;
+    private EnumMap<MapElementType, Boolean> cango;
+    private Boolean going = false;
 
-    private MoveElement(int x, int y) {
+
+    public MoveElement(int x, int y, Direct direct) {
         super(x, y);
-    }
-
-    MoveElement(int x, int y, int direct) {
-        super(x, y);
-        this.direct = direct;
-    }
-
-    void setDirect(int direct) {
         this.direct = direct;
     }
 
@@ -46,33 +37,22 @@ public class MoveElement extends ElementOld {
         return direct - 1;
     }
 
-    int getR(int direct) {
-        if (direct == 3) {
-            return 0;
-        }
-        return direct + 1;
-    }
-
-    int getContrary(int direct) {
-        return getR(getR(direct));
-    }
-
     // 移动
     public void move() {
         switch (this.direct) {
             case UP ->// 上
-                    y -= speed;
+                    decrY(speed);
             case RIGHT ->// 右
-                    x += speed;
+                    incrX(speed);
             case DOWN ->// 下
-                    y += speed;
+                    incrY(speed);
             case LEFT ->// 左
-                    x -= speed;
+                    decrX(speed);
         }
     }
 
     // 获取当前战场二维通行图
-    int[][] getCurrentMap(boolean[] cango) {
+    public int[][] getCurrentMap(boolean[] cango) {
         int[][] map = Game.getStageMap();
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
@@ -89,8 +69,8 @@ public class MoveElement extends ElementOld {
         }
         for (Tank tank : Game.getStage().getAllTank()) {
             if (tank != this) {
-                int m = tank.y / 16;
-                int n = tank.x / 16;
+                int m = tank.getY() / 16;
+                int n = tank.getX() / 16;
                 map[m][n] = 1;
                 if (n + 1 < map[0].length) {
                     map[m][n + 1] = 1;
@@ -107,37 +87,38 @@ public class MoveElement extends ElementOld {
     }
 
     // 记录上一个可移动的坐标
-    void setOldXY() {
-        oldx = x;
-        oldy = y;
+    public void setOldXY() {
+        setOldX(getX());
+        setOldY(getY());
     }
 
     // 修正坐标
-    void stay() {
-        x = oldx;
-        y = oldy;
+    public void stay() {
+        setX(oldX);
+        setY(oldY);
         going = false;
     }
 
-    boolean isTouchWall() {
-        return Ztream.of(Game.getStage().elements).anyMatch(e-> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
+    public boolean isTouchWall() {
+        return Ztream.of(Game.getStage().elements).anyMatch(e -> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
     }
 
-    int getNextStep(int i, int j) {
-        int direct = this.direct;
-        int m = y / 16;
-        int n = x / 16;
+    public Direct getNextStep(int i, int j) {
+        int m = getY() / 16;
+        int n = getX() / 16;
         if (m == i) {
             if (n == j + 1) {
-                direct = 3;
-            } else if (n == j - 1) {
-                direct = 1;
+                return Direct.LEFT;
+            }
+            if (n == j - 1) {
+                return Direct.RIGHT;
             }
         } else if (n == j) {
             if (m == i + 1) {
-                direct = 0;
-            } else if (m == i - 1) {
-                direct = 2;
+                return Direct.UP;
+            }
+            if (m == i - 1) {
+                return Direct.DOWN;
             }
         }
         return direct;

@@ -1,5 +1,7 @@
 package com.element;
 
+import com.element.tank.Enemy;
+import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 
@@ -11,25 +13,27 @@ public class Wave extends Bullet {
 
     public Wave(Tank tank) {
         super(tank);
-        this.reach = 8;
-        this.width = 192;
-        this.height = 192;
-        switch (direct) {
-            case 0 -> {
-                this.x = master.x - 96 + 16;
-                this.y = y - 96 - 32;
+        this.setReach(8);
+        this.setWidth(192);
+        this.setHeight(192);
+        int masterX = getMaster().getX();
+        int masterY = getMaster().getY();
+        switch (getDirect()) {
+            case UP -> {
+                setX(masterX - 96 + 16);
+                setY(getY() - 96 - 32);
             }
-            case 1 -> {
-                this.x = master.x + 32 - 48;
-                this.y = y - 96 + 16;
+            case RIGHT -> {
+                setX(masterX + 32 - 48);
+                setY(getY() - 96 + 16);
             }
-            case 2 -> {
-                this.x = master.x - 96 + 16;
-                this.y = y - 32;
+            case DOWN -> {
+                setX(masterX - 96 + 16);
+                setY(getY() - 32);
             }
-            case 3 -> {
-                this.x = master.x - 192 + 48;
-                this.y = y - 96 + 16;
+            case LEFT -> {
+                setX(masterX - 192 + 48);
+                setY(getY() - 96 + 16);
             }
         }
     }
@@ -37,30 +41,31 @@ public class Wave extends Bullet {
     @Override
     public void bitTank() {
         List<Enemy> tanks = Game.getStage().getEnemys();
-        Ztream.of(Game.getStage().getRewards()).forEach(e->{});
+        Ztream.of(Game.getStage().getRewards()).forEach(e -> {
+        });
 
         for (Tank tank : tanks) {
             if (this.isTouch(tank)) {
-                tank.isLive = false;
+                tank.setIsLive(false);
             }
         }
     }
 
     @Override
     public void draw(Graphics g) {
-        image = Game.getMaterial("wave").getSubimage(direct * 192, 0, 192, 192);
-        g.drawImage(image, x, y, 192, 192, Game.getStage());
-        if (isLive) {
+        setImage(Game.getMaterial("wave").getSubimage(getDirect().ordinal() * 192, 0, 192, 192));
+        g.drawImage(getImage(), getX(), getY(), 192, 192, Game.getStage());
+        if (getIsLive()) {
             if (!Game.pause) {
                 bitTank();
-                if (reach > 0)
-                    reach--;
-                else
-                    isLive = false;
+                if (getReach() > 0) {
+                    setReach(getReach() - 1);
+                } else
+                    setIsLive(false);
             }
         } else {
             Game.getStage().bullets.remove(this);
-            master.buttlenumber--;
+            getMaster().decrBulletNum();
         }
     }
 }

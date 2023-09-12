@@ -1,9 +1,13 @@
 package com.scene;
 
 import com.element.*;
+import com.element.enums.Direct;
 import com.element.inter.Draw;
 import com.element.map.Iron;
 import com.element.map.MapElement;
+import com.element.tank.Enemy;
+import com.element.tank.Player;
+import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
@@ -64,9 +68,9 @@ public class Stage extends Scene {
     }
 
     private void removeDeath() {
-        bombs.removeIf(e -> !e.isLive);
-        rewards.removeIf(e -> !e.isLive);
-        elements.removeIf(e -> !e.isLive);
+        bombs.removeIf(e -> !e.getIsLive());
+        rewards.removeIf(e -> !e.getIsLive());
+        elements.removeIf(e ->  !e.getIsLive());
     }
 
     private void drawGame(Graphics g) {
@@ -111,8 +115,8 @@ public class Stage extends Scene {
 
     private void setPlayer() {
         for (int i = 0; i < Game.player_number; i++) {
-            Player player = new Player(32 * 4 + i * 3 * 32 + 32 * i, 32 * 12, 0);
-            player.DIRECTKEY = Game.PlayerDIRECT[i];
+            Player player = new Player(32 * 4 + i * 3 * 32 + 32 * i, 32 * 12, Direct.UP);
+            player.setDIRECTKEY(Game.PlayerDIRECT[i]);
             player.setImage(i + 1);
             players.add(player);
         }
@@ -168,8 +172,8 @@ public class Stage extends Scene {
         g.setColor(Color.GRAY);
         for (int i = 0; i < fog.length; i++) {
             for (int j = 0; j < fog[0].length; j++) {
-                int a = Math.abs(player.x + 8 - j * 16);
-                int b = Math.abs(player.y + 8 - i * 16);
+                int a = Math.abs(player.getX() + 8 - j * 16);
+                int b = Math.abs(player.getY() + 8 - i * 16);
                 if (Math.sqrt(a * a + b * b) >= 32 * 4 && fog[i][j] <= 96) {
                     ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) ((96 - fog[i][j]) / 96.0));
                     g2d.setComposite(ac);
@@ -192,7 +196,7 @@ public class Stage extends Scene {
     public int[][] getMap() {
         int[][] map = new int[getHeight() / 16][getWidth() / 16];
         Ztream.of(Game.getStage().elements).forEach(e -> {
-            map[e.y / 16][e.x / 16] = e.getMapType().ordinal() + 1;
+            map[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1;
         });
         return map;
     }
@@ -211,9 +215,9 @@ public class Stage extends Scene {
                 }
             }
             if (!flag && enumber - enemys.size() > 0) {
-                Enemy enemytank = new Enemy(32 * 6 * index, 0, Game.Rand(4), 2);
+                Enemy enemytank = new Enemy(32 * 6 * index, 0, Game.Rand(4), Direct.DOWN);
                 if (Game.Rand(5) > 3) {
-                    enemytank.withReward = true;
+                    enemytank.setWithReward(true);
                 }
                 enemys.add(enemytank);
             }
@@ -222,10 +226,10 @@ public class Stage extends Scene {
 
     public void dispose() {
         for (Tank tank : getAllTank()) {
-            tank.isLive = false;
+            tank.setIsLive(false);
         }
         for (Bullet bullet : bullets) {
-            bullet.isLive = false;
+            bullet.setIsLive(false);
         }
     }
 
@@ -237,8 +241,8 @@ public class Stage extends Scene {
     public void Reward(Player player, Reward reward) {
         switch (reward.id) {
             case 0:
-                int m = fort.y / 16;
-                int n = fort.x / 16;
+                int m = fort.getY() / 16;
+                int n = fort.getX() / 16;
                 for (int i = m - 1; i < m + 2; i++) {
                     for (int j = n - 1; j < n + 3; j++) {
                         Iron iron = new Iron(j * 16, i * 16);
@@ -249,8 +253,8 @@ public class Stage extends Scene {
                 }
                 break;
             case 1:
-                if (player.level < 4) {
-                    player.level++;
+                if (player.getLevel() < 4) {
+                    player.setLevel(player.getLevel()+1);
                 }
                 break;
             case 2:
@@ -258,15 +262,15 @@ public class Stage extends Scene {
                 break;
             case 3:
                 player.flash.life = 64;
-                player.flash.isLive = true;
+                player.flash.setIsLive(false);
                 break;
             case 4:
                 for (Enemy enemy : enemys) {
-                    enemy.isLive = false;
+                    enemy.setIsLive(false);
                 }
                 break;
             case 5:
-                player.maxlife++;
+                player.setMaxlife(player.getMaxlife()+1);
                 break;
         }
     }
@@ -319,7 +323,7 @@ public class Stage extends Scene {
             repaint();
             Game.Sleep(30);
             creatEnemy();
-            if (!fort.isLive || EmptyUtil.isEmpty(players)) {
+            if (!fort.getIsLive() || EmptyUtil.isEmpty(players)) {
                 Game.fail = true;
             }
             if (pausetime > 0) {

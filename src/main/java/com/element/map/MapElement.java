@@ -18,14 +18,14 @@ public class MapElement extends ElementOld {
 
     public MapElement(int x, int y, MapElementType mapType) {
         super(x, y);
-        this.width = 16;
-        this.height = 16;
+        this.setWidth(16) ;
+        this.setHeight(16) ;
         this.mapType = mapType;
         getImage(mapType.ordinal() + 1);
     }
 
     public void getImage(int i) {
-        image = Game.getMaterial("map").getSubimage((i - 1) * 16, 0, 16, 16);
+        setImage(Game.getMaterial("map").getSubimage((i - 1) * 16, 0, 16, 16));
     }
 }
 

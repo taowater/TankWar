@@ -1,49 +1,54 @@
-package com.element;
+package com.element.tank;
 
+import com.element.Flash;
+import com.element.enums.Direct;
 import com.element.enums.MapElementType;
 import com.element.map.MapElement;
+import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import com.util.MusicUtil;
+import lombok.Data;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 //玩家操作坦克的类
+@Data
 public class Player extends Tank {
-    int score = 0;
-    public int level = 1;
-    public int[] DIRECTKEY = new int[5];
-    public int maxlife;
-    private int newDirect;
+    private int score = 0;
+    private int level = 1;
+    private int[] DIRECTKEY = new int[5];
+    private int maxlife;
+    private Direct newDirect;
 
-    public Player(int x, int y, int direct) {
+    public Player(int x, int y, Direct direct) {
         super(x, y, direct);
         this.isPlayer = true;
-        this.speed = 4;
+        this.setSpeed(4);
         this.newDirect = direct;
         this.maxbuttle = 1;
         this.maxlife = 99;
         this.bulletType = 0;
-        this.image = Game.getMaterial("player1");
+        this.setImage(Game.getMaterial("player1"));
         this.flash = new Flash(this);
     }
 
     public void setImage(int i) {
-        image = Game.getMaterial("player" + i);
+        setImage( Game.getMaterial("player" + i));
     }
 
     // 描绘
     @Override
     public void draw(Graphics g) {
-        BufferedImage tank = image.getSubimage((level - 1) * 56, 28 * direct, 28, 28);
-        if (star.isLive) {
+        BufferedImage tank = getImage().getSubimage((level - 1) * 56, 28 * getDirect().ordinal(), 28, 28);
+        if (star.getIsLive()) {
             star.draw(g);
-        } else if (isLive) {
+        } else if (getIsLive()) {
             star.dispose();
             super.draw(g, tank);
-            if (flash.isLive) {
+            if (flash.getIsLive()) {
                 flash.draw(g);
             }
             if (!Game.pause) {
@@ -62,11 +67,11 @@ public class Player extends Tank {
     void active() {
         long time = System.currentTimeMillis();
         for (int i = 0; i < 4; i++) {
-            if (ACTIVE[i] || going) {
+            if (ACTIVE[i] || getGoing()) {
                 if (time - moveLastTime >= 20) {
                     moveLastTime = time;
-                    if (!going) {
-                        direct = newDirect;
+                    if (!getGoing()) {
+                        setDirect(newDirect);
                     }
                     move();
                 }
@@ -85,17 +90,21 @@ public class Player extends Tank {
         Ztream.of(Game.getStage().getRewards()).forEach(e -> {
             if (getRect().intersects(e.getRect())) {
                 Game.stage.Reward(this, e);
-                e.isLive = false;
+                e.setIsLive(false);
                 MusicUtil.play("奖励");
             }
         });
+    }
+
+    public void decrMaxLife(){
+        this.maxlife--;
     }
 
     // 移动
     @Override
     public void move() {
         super.move();
-        going = x % 16 != 0 || y % 16 != 0;
+         setGoing(  getX() % 16 != 0 || getY() % 16 != 0);
         if (isTouchOtherTanks() || isTouchWall()) {
             stay();
         }
@@ -114,29 +123,29 @@ public class Player extends Tank {
     }
 
     void Reborn() {
-        x = 32 * 4;
-        y = 32 * 12;
+       setX(  32 * 4);
+        setY ( 32 * 12);
         if (this.DIRECTKEY == Game.PlayerDIRECT[1]) {
-            x = 32 * 8;
+            setX( 32 * 8);
         }
-        direct = 0;
-        speed = 4;
+        setDirect(Direct.UP);
+       setSpeed(4);
         level = 1;
-        star.life = 14;
-        star.isLive = true;
+        star.setLife(14);
+        star.setIsLive(true);
         flash.life = 32;
-        flash.isLive = true;
-        isLive = true;
+        flash.setIsLive(true);
+        setIsLive(true);
         initMove();
     }
 
     public void KeyPressed(KeyEvent e) {
-        if (isLive) {
+        if (getIsLive()) {
             for (int i = 0; i < 5; i++) {
                 if (e.getKeyCode() == DIRECTKEY[i]) {
                     ACTIVE[i] = true;
                     if (i < 4) {
-                        newDirect = i;
+                        newDirect = Direct.get(i);
                     }
                 }
             }
@@ -144,7 +153,7 @@ public class Player extends Tank {
     }
 
     public void keyReleased(KeyEvent e) {
-        if (isLive) {
+        if (getIsLive()) {
             for (int i = 0; i < 5; i++) {
                 if (e.getKeyCode() == DIRECTKEY[i]) {
                     ACTIVE[i] = false;
@@ -165,38 +174,4 @@ public class Player extends Tank {
     }
 }
 
-class Airplane extends Player {
 
-    public Airplane(int x, int y, int direct) {
-        super(x, y, 0);
-        this.image = Game.getMaterial("飞机");
-    }
-
-    @Override
-    public boolean isTouchWall() {
-        return !isInStage();
-    }
-
-    @Override
-    public void draw(Graphics g) {
-        g.drawImage(image, x, y, 32, 32, Game.stage);
-        if (star.isLive) {
-            star.draw(g);
-        } else if (isLive) {
-            star.dispose();
-            g.drawImage(image, x, y, width, height, Game.stage);
-            if (flash.isLive) {
-                flash.draw(g);
-            }
-            if (!Game.pause) {
-                setOldXY();
-                active();
-                beRewarded();
-            }
-        } else {
-            if (maxlife > 0) {
-                Reborn();
-            }
-        }
-    }
-}

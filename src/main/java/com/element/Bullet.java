@@ -1,36 +1,48 @@
 package com.element;
 
 import com.ai.AStar;
+import com.element.enums.Direct;
 import com.element.enums.MapElementType;
 import com.element.map.Brick;
 import com.element.map.Iron;
 import com.element.map.MapElement;
+import com.element.tank.Enemy;
+import com.element.tank.Player;
+import com.element.tank.Tank;
 import com.game.*;
 import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.scene.Stage;
 import com.util.MusicUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 
 //子弹的类
+@Data
 public class Bullet extends MoveElement {
-    final Tank master;
-    boolean canGuaiWan;
-    int reach = 18 * 3;
+    private Tank master;
+    boolean canTurn;
+
+    /**
+     * 射程
+     */
+    private int reach = 18 * 3;
     static int[] list = null;
 
     // 子弹构造函数，要求初始化坐标及方向
     public Bullet(Tank master) {
-        super(master.x, master.y, master.direct);
-        this.width = 32;
-        this.height = 32;
-        this.speed = 8;
+        super(master.getX(), master.getY(), master.getDirect());
+        this.setWidth(32);
+        this.setHeight(32);
+        this.setSpeed(8);
         this.master = master;
-        this.direct = master.direct;
-        this.cango = Bullet.GO_MAP;
+        this.setCango(Bullet.GO_MAP);
         init();
         MusicUtil.play("开始攻击");
     }
@@ -46,57 +58,58 @@ public class Bullet extends MoveElement {
     }
 
 
-    public void setCanGuaiWan(boolean flag) {
-        this.canGuaiWan = flag;
+    public void setCanTurn(boolean flag) {
+        this.canTurn = flag;
     }
 
     private void init() {
         if (master instanceof Player player) {
-            if (player.level > 1) {
-                this.speed = 16;
+            if (player.getLevel() > 1) {
+                this.setSpeed(16);
             }
         } else if (master instanceof Enemy enemy) {
-            if (enemy.type == 2) {
-                this.speed = 16;
+            if (enemy.getType() == 2) {
+                this.setSpeed(16);
             }
         }
     }
 
     @Override
     public void draw(Graphics g) {
-        image = Game.getMaterial("bullet").getSubimage(direct * 16, 0, 16, 16);
-        if (isLive) {
+        setImage(Game.getMaterial("bullet").getSubimage(getDirect().ordinal() * 16, 0, 16, 16));
+        if (getIsLive()) {
             if (!isTouch(master))
-                g.drawImage(image, x + 8, y + 8, 16, 16, Game.getStage());
+                g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());
             if (!Game.pause) {
                 if (!isInStage()) {
-                    isLive = false;
+                    setIsLive(false);
                 }
                 setOldXY();
                 normalFly();
-                if (canGuaiWan)
+                if (canTurn)
                     guaiwan();
                 bitFort(Game.stage.fort);
                 bitBullet();
                 bitTank();
                 bitBrick();
-                if (reach > 0)
+                if (reach > 0) {
                     reach--;
-                else
-                    isLive = false;
+                } else {
+                    setIsLive(false);
+                }
             }
         } else {
             Game.getStage().bullets.remove(this);
-            master.buttlenumber--;
-            Bomb bomb = new Bomb(x, y);
+            master.decrBulletNum();
+            Bomb bomb = new Bomb(getX(), getY());
             Game.getStage().bombs.add(bomb);
         }
     }
 
     private void bitFort(Fort fort) {
-        if (isTouch(fort) && fort.isLive) {
-            fort.isLive = false;
-            isLive = false;
+        if (isTouch(fort) && fort.getIsLive()) {
+            fort.setIsLive(false);
+            setIsLive(false);
         }
     }
 
@@ -104,8 +117,8 @@ public class Bullet extends MoveElement {
         for (int i = 0; i < Game.getStage().bullets.size(); i++) {
             Bullet bullet = Game.getStage().bullets.get(i);
             if (this != bullet && this.master != bullet.master && isTouch(bullet)) {
-                isLive = false;
-                bullet.isLive = false;
+                setIsLive(false);
+                bullet.setIsLive(false);
             }
         }
     }
@@ -114,29 +127,26 @@ public class Bullet extends MoveElement {
         List<Tank> tanks = Game.getStage().getAllTank();
         for (Tank tank : tanks) {
             if (master != tank && isTouch(tank)) {
-                if (tank.isPlayer) {
-                    Player player = (Player) tank;
-                    player.maxlife--;
-                    player.isLive = false;
-                    isLive = false;
-                } else {
-                    Enemy enemy = (Enemy) tank;
-                    if (master.isPlayer) {
+                if (tank instanceof Player player) {
+                    player.decrMaxLife();
+                    player.setIsLive(false);
+                    setIsLive(false);
+                } else if (tank instanceof Enemy enemy) {
+                    if (master instanceof Player player) {
                         if (Game.stage.players.size() < 2) {
-                            Stage.CountData.level[enemy.type]++;
+                            Stage.CountData.level[enemy.getType()]++;
                         } else {
                             if (master == Game.stage.players.get(0)) {
-                                Stage.CountData.level[enemy.type]++;
+                                Stage.CountData.level[enemy.getType()]++;
                             } else {
-                                Stage.CountData.level2[enemy.type]++;
+                                Stage.CountData.level2[enemy.getType()]++;
                             }
                         }
-                        enemy.isLive = false;
-                        isLive = false;
-                        enemy.bitdead = true;
-                        Player player = (Player) master;
-                        player.score += enemy.mask;
-                        if (enemy.withReward) {
+                        enemy.setIsLive(false);
+                        setIsLive(false);
+                        enemy.setBitdead(true);
+                        player.setScore(player.getScore() + enemy.getMask());
+                        if (enemy.getWithReward()) {
                             Game.stage.creatReward();
                         }
                     }
@@ -146,10 +156,10 @@ public class Bullet extends MoveElement {
     }
 
     public Rectangle getRect() {
-        if (direct > 3) {
-            return new Rectangle(x + 8, y + 8, 16, 16);
-        } else
-            return (super.getRect());
+        if (getDirect().ordinal() > 3) {
+            return new Rectangle(getX() + 8, getY() + 8, 16, 16);
+        }
+        return super.getRect();
     }
 
     private MapElement[] getbBitElement() {
@@ -159,8 +169,8 @@ public class Bullet extends MoveElement {
         int length = elements.size();
         for (int i = 0; i < length; i++) {
             MapElement element = elements.get(i);
-            if (isTouch(element) && element.isLive && !Bullet.GO_MAP.get(element.getMapType())) {
-                isLive = false;
+            if (isTouch(element) && element.getIsLive() && !Bullet.GO_MAP.get(element.getMapType())) {
+                setIsLive(false);
                 elements_temp[index++] = element;
             }
             if (index > 2) {
@@ -182,15 +192,15 @@ public class Bullet extends MoveElement {
 
     private void bitBrick() {
         MapElement[] elements = getbBitElement();
-        if (direct > 3) {
+        if (getDirect().ordinal() > 3) {
             for (MapElement mapElement : elements) {
                 if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
                     if (mapElement instanceof Iron) {
-                        if (master instanceof Player player && player.level > 2) {
-                            mapElement.isLive = false;
+                        if (master instanceof Player player && player.getLevel() > 2) {
+                            mapElement.setIsLive(false);
                         }
                     } else {
-                        mapElement.isLive = false;
+                        mapElement.setIsLive(false);
                     }
                 }
             }
@@ -203,10 +213,10 @@ public class Bullet extends MoveElement {
                     if (mapElement instanceof Brick brick) {
                         isSmallElementLive[key] = true;
                         isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
-                    } else if (mapElement instanceof Iron iron) {
+                    } else if (mapElement instanceof Iron) {
                         if (master instanceof Player player) {
-                            if (player.level > 2) {
-                                iron.isLive = false;
+                            if (player.getLevel() > 2) {
+                                mapElement.setIsLive(false);
                             }
                         }
                     }
@@ -228,52 +238,56 @@ public class Bullet extends MoveElement {
     }
 
     private void normalFly() {
-        switch (direct) {
+        int speed = getSpeed();
+        int n = (int) (speed / Math.sqrt(2));
+        switch (getDirect()) {
             case UP:// 上
                 list = new int[]{2, 3, 0, 1};
-                y -= speed;
+                decrY(speed);
                 break;
             case RIGHT:// 右
                 list = new int[]{0, 2, 1, 3};
-                x += speed;
+                incrX(speed);
                 break;
             case DOWN:// 下
                 list = new int[]{0, 1, 2, 3};
-                y += speed;
+                incrY(speed);
                 break;
             case LEFT:// 左
                 list = new int[]{1, 3, 0, 2};
-                x -= speed;
+                decrX(speed);
                 break;
             case LEFT_UP:// 左上
-                y -= speed / Math.sqrt(2);
-                x -= speed / Math.sqrt(2);
+                decrX(n);
+                decrY(n);
                 break;
             case RIGHT_UP:// 右上
-                x += speed / Math.sqrt(2);
-                y -= speed / Math.sqrt(2);
+                incrX(n);
+                decrY(n);
                 break;
             case RIGHT_DOWN:// 右下
-                x += speed / Math.sqrt(2);
-                y += speed / Math.sqrt(2);
+                incrX(n);
+                incrY(n);
                 break;
             case LEFT_DOWN:// 左下
-                x -= speed / Math.sqrt(2);
-                y += speed / Math.sqrt(2);
+                decrX(n);
+                incrY(n);
                 break;
         }
     }
 
     private void TrackFly(Tank tank) {
-        int i = tank.y / 16;
-        int j = tank.x / 16;
-        if (i >= 0 && j >= 0 && tank.isLive) {
+        int i = tank.getY() / 16;
+        int j = tank.getX() / 16;
+        int x = getX();
+        int y = getY();
+        if (i >= 0 && j >= 0 && tank.getIsLive()) {
             if (y % 16 == 0 && x % 16 == 0) {
                 int[][] currenMap = getCurrentMap(Game.bulletcango);
                 List<Point> path = new AStar(currenMap, y / 16, x / 16, i, j).search();
                 if (EmptyUtil.isNotEmpty(path)) {
                     Point point = path.get(path.size() - 1);
-                    this.direct = getNextStep(point.x, point.y);
+                    this.setDirect(getNextStep(point.x, point.y));
                 }
             }
         }
@@ -287,9 +301,9 @@ public class Bullet extends MoveElement {
             if (isTouchWall()) {
                 stay();
                 if (Game.Rand(2) == 0) {
-                    setDirect(getR(direct));
+                    setDirect(Direct.getR(getDirect()));
                 } else {
-                    setDirect(getL(direct));
+                    setDirect(Direct.getL(getDirect()));
                 }
             }
         }

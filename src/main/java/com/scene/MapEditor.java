@@ -59,7 +59,7 @@ public class MapEditor extends Scene {
         int length = map.size();
         Ztream.of(map).forEach(e->{
             e.draw(g, this);
-            map_temp[e.y / 16][e.x / 16] = e.getMapType().ordinal() + 1;
+            map_temp[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1;
         });
     }
 
@@ -68,7 +68,7 @@ public class MapEditor extends Scene {
         int length = map.size();
         for (int i = 0; i < length; i++) {
             MapElement mapElement = map.get(i);
-            if (mapElement.x == X && mapElement.y == Y) {
+            if (mapElement.getX() == X && mapElement.getY() == Y) {
                 mapElement_temp = mapElement;
             }
         }

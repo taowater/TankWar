@@ -53,14 +53,14 @@ public class Title extends Scene {
         Ztream.of(logo).append(logo2).append(logoRemove).forEach(e -> e.draw(g, this));
 
         Ztream.of(logoRemove).forEach(e -> {
-            if (e.y > 0 && e.x < TankWar.WIDTH) {
-                e.y -= Game.Rand(10);
-                e.x += Game.Rand(24);
+            if (e.getY() > 0 && e.getX() < TankWar.WIDTH) {
+                e.setY(e.getY() - Game.Rand(10));
+                e.setX(e.getX() + Game.Rand(24));
             } else {
-                e.isLive = false;
+                e.setIsLive(false);
             }
         });
-        logoRemove.removeIf(e -> !e.isLive);
+        logoRemove.removeIf(e -> !e.getIsLive());
         if (!open) {
             drawPressAnyKey(g);
         }

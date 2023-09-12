@@ -1,5 +1,6 @@
 package com.element;
 
+import com.element.tank.Tank;
 import com.game.Game;
 
 import java.awt.*;
@@ -10,13 +11,13 @@ import java.awt.*;
 public class Star extends ElementOld {
 
 	public Star(Tank tank) {
-		super(tank.x, tank.y);
-		this.life = 14;
+		super(tank.getX(), tank.getY());
+		this.setLife(14);
 	}
 
 	@Override
     public void draw(Graphics g) {
-		image = Game.getMaterial("material").getSubimage(life % 7 * 32, 0, width, height);
+		setImage(Game.getMaterial("material").getSubimage(getLife() % 7 * 32, 0, getWidth(), getHeight()));
 		super.draw(g);
 		downLife();
 	}

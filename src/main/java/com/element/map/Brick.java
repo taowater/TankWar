@@ -21,20 +21,20 @@ public class Brick extends MapElement {
     }
 
     public void draw(Graphics g, Scene scene) {
-        if (isLive) {
+        if (getIsLive()) {
             boolean flag_temp = false;
             BufferedImage part;
             for (int i = 0; i < 4; i++) {
                 if (flag[i]) {
                     int x_temp = (i % 2) * 8;
                     int y_temp = (i / 2) * 8;
-                    part = image.getSubimage(x_temp, y_temp, 8, 8);
-                    g.drawImage(part, x + x_temp, y + y_temp, 8, 8, Game.getStage());
+                    part = getImage().getSubimage(x_temp, y_temp, 8, 8);
+                    g.drawImage(part, getX() + x_temp, getY() + y_temp, 8, 8, Game.getStage());
                     flag_temp = true;
                 }
             }
             if (!flag_temp) {
-                this.isLive = false;
+                setIsLive(false);
             }
         }
     }

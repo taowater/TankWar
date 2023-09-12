@@ -11,8 +11,8 @@ import java.awt.event.KeyListener;
 
 public class TankWar extends JFrame implements KeyListener, ActionListener {
 
-    public static final int WIDTH = 528;//+32+32;
-    public static final int HEIGHT = 480 + 24;
+    public static final int WIDTH = 32 * 13 + 32 * 4;// 528 +24; +32;
+    public static final int HEIGHT = 32 * 13 + 32 * 2 + 48;//480 + 24 + 32;
 
     public Title title = null;
     private StageStart start;
