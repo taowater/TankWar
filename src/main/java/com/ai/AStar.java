@@ -1,10 +1,12 @@
 package com.ai;
 
 import com.game.Game;
+import com.history.core.util.Any;
 import com.history.core.util.EmptyUtil;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -58,11 +60,13 @@ public class AStar {
 
         int x = node.x;
         int y = node.y;
+        int endX = endNode.x;
+        int endY = endNode.y;
         int[] directList = {0, 1, 2, 3};
-        int direct = Game.getAinBdirection(new Point(node.y, node.x), new Point(endNode.y, endNode.x));
+        int direct = Game.getAinBdirection(new Point(y, x), new Point(endY, endX));
 
-        int xValue = Math.abs(endNode.y - node.y);
-        int yValue = Math.abs(endNode.x - node.x);
+        int xValue = Math.abs(endY - y);
+        int yValue = Math.abs(endX - x);
         if (direct == 4) {
             if (xValue > yValue) {
                 directList = new int[]{1, 2, 0, 3};
@@ -101,19 +105,6 @@ public class AStar {
         }
     }
 
-    // 使用冒泡排序将开启列表中的节点按F值从小到大排序
-    private void sort(List<Node> arr) {
-        for (int i = 0; i < arr.size() - 1; i++) {
-            for (int j = i + 1; j < arr.size(); j++) {
-                if (arr.get(i).f > arr.get(j).f) {
-                    Node tmp = arr.get(i);
-                    arr.set(i, arr.get(j));
-                    arr.set(j, tmp);
-                }
-            }
-        }
-    }
-
     // 将节点添加进“关闭列表”
     private void inClose(Node node, List<Node> open) {
         if (open.contains(node)) {
@@ -140,7 +131,7 @@ public class AStar {
         close.add(map[startNode.x][startNode.y]);
         map[startNode.x][startNode.y].cango = false;
         map[startNode.x][startNode.y].fatherNode = map[startNode.x][startNode.y];
-        sort(open);
+        Any.of(open).ifPresent(l -> l.sort(Comparator.comparing(n -> n.f)));
         // 重复步骤
         do {
             if (EmptyUtil.isNotEmpty(open)) {
