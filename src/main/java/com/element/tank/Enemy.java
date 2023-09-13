@@ -88,13 +88,13 @@ public class Enemy extends Tank {
                     }
                     case 2 -> {
                         randomGo();
-                        if (canBit(Game.stage.getPlayers().get(Game.Rand(1))) && Game.Rand(50) == 1) {
+                        if (canBit(Game.stage.getAnyPlayer()) && Game.Rand(50) == 1) {
                             shoot();
                         }
                     }
                     case 3 -> {
                         trackMove();
-                        if (canBit(Game.stage.getPlayers().get(Game.Rand(1))) && Game.Rand(10) == 1) {
+                        if (canBit(Game.stage.getAnyPlayer()) && Game.Rand(10) == 1) {
                             shoot();
                         }
                     }
@@ -108,11 +108,14 @@ public class Enemy extends Tank {
         setIsLive(false);
         Game.stage.enumber--;
         BigBomb bigbomb = new BigBomb(getX(), getY());
-        Game.getStage().elements.add(bigbomb);
+        Game.getStage().addElement(bigbomb);
     }
 
     // 判断能否击中玩家
     private boolean canBit(ElementOld element) {
+        if (EmptyUtil.isEmpty(element)){
+            return false;
+        }
         if (element.getIsLive()) {
             int x = getX();
             int y = getY();

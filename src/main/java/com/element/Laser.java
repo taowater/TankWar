@@ -35,6 +35,11 @@ public class Laser extends Bullet {
         length();
     }
 
+    public void death() {
+        setIsLive(false);
+        getMaster().decrBulletNum();
+    }
+
     @Override
     public void draw(Graphics g) {
         setImage(Game.getMaterial("bullet_2").getSubimage(getDirect().ordinal() * 16, 0, 16, 16));
@@ -42,18 +47,14 @@ public class Laser extends Bullet {
         if (getLife() > 0) {
             setLife(getLife() - 1);
         } else {
-            setIsLive(false);
+            death();
+            return;
         }
-        if (getIsLive()) {
-            if (!Game.pause) {
-                bitTank();
-            }
-            if (!isInStage()) {
-                setIsLive(false);
-            }
-        } else {
-            getMaster().decrBulletNum();
-            Game.getStage().elements.remove(this);
+        if (!Game.pause) {
+            bitTank();
+        }
+        if (!isInStage()) {
+            death();
         }
     }
 

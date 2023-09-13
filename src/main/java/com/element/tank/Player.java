@@ -115,7 +115,7 @@ public class Player extends Tank {
             if (isTouch(e)) {
                 if (e.getMapType() == MapElementType.BRICK) {
                     MusicUtil.play("移动");
-                    Game.getStage().elements.remove(e);
+                    Game.getStage().removeElement(e);
                 }
             }
         });

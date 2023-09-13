@@ -39,7 +39,7 @@ public class Stage extends Scene {
     private long lastCreatEnemyTime = 0;
     public Fort fort;
 
-    public final List<ElementOld> elements = new ArrayList<>();
+    private final List<ElementOld> elements = new ArrayList<>();
 
     private int overy = 32 * 13;
 
@@ -50,6 +50,14 @@ public class Stage extends Scene {
     public Stage() {
         super();
         init();
+    }
+
+    public void addElement(ElementOld e){
+        this.elements.add(e);
+    }
+
+    public void removeElement(ElementOld e){
+        this.elements.remove(e);
     }
 
     private void drawElements(Graphics g) {
@@ -132,6 +140,10 @@ public class Stage extends Scene {
 
     public List<Player> getPlayers() {
         return getElements(Player.class);
+    }
+
+    public Player getAnyPlayer() {
+        return Ztream.of(getPlayers()).any().orElse(null);
     }
 
     private <E extends ElementOld> List<E> getElements(Class<E> clazz) {

@@ -91,7 +91,7 @@ public class Tank extends MoveElement {
     }
 
     private void stageAdd(Bullet bullet) {
-        Game.getStage().elements.add(bullet);
+        Game.getStage().addElement(bullet);
         bulletNum++;
     }
 

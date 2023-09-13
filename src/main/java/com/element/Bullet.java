@@ -104,7 +104,7 @@ public class Bullet extends MoveElement {
         this.setIsLive(false);
         master.decrBulletNum();
         Bomb bomb = new Bomb(getX(), getY());
-        Game.getStage().elements.add(bomb);
+        Game.getStage().addElement(bomb);
     }
 
 
