@@ -7,8 +7,10 @@ import com.element.map.MapElement;
 import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -16,6 +18,7 @@ import java.awt.image.BufferedImage;
 
 //玩家操作坦克的类
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Player extends Tank {
     private int score = 0;
     private int level = 1;
@@ -31,12 +34,12 @@ public class Player extends Tank {
         this.maxbuttle = 1;
         this.maxlife = 99;
         this.bulletType = 0;
-        this.setImage(Game.getMaterial("player1"));
+        this.setImage(ImageUtil.getMaterial("player1"));
         this.flash = new Flash(this);
     }
 
     public void setImage(int i) {
-        setImage( Game.getMaterial("player" + i));
+        setImage(ImageUtil.getMaterial("player" + i));
     }
 
     // 描绘
@@ -96,7 +99,7 @@ public class Player extends Tank {
         });
     }
 
-    public void decrMaxLife(){
+    public void decrMaxLife() {
         this.maxlife--;
     }
 
@@ -104,14 +107,14 @@ public class Player extends Tank {
     @Override
     public void move() {
         super.move();
-         setGoing(  getX() % 16 != 0 || getY() % 16 != 0);
+        setGoing(getX() % 16 != 0 || getY() % 16 != 0);
         if (isTouchOtherTanks() || isTouchWall()) {
             stay();
         }
     }
 
     void clearBrick() {
-        Ztream.of(Game.getStage().getMapElements()).forEach(e->{
+        Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
             if (isTouch(e)) {
                 if (e.getMapType() == MapElementType.BRICK) {
                     MusicUtil.play("移动");
@@ -122,13 +125,13 @@ public class Player extends Tank {
     }
 
     void Reborn() {
-       setX(  32 * 4);
-        setY ( 32 * 12);
+        setX(32 * 4);
+        setY(32 * 12);
         if (this.DIRECTKEY == Game.PlayerDIRECT[1]) {
-            setX( 32 * 8);
+            setX(32 * 8);
         }
         setDirect(Direct.UP);
-       setSpeed(4);
+        setSpeed(4);
         level = 1;
         star.setLife(14);
         star.setIsLive(true);

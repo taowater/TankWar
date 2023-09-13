@@ -3,6 +3,7 @@ package com.element;
 import com.element.inter.Draw;
 import com.game.Game;
 import com.scene.Scene;
+import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
 
@@ -34,7 +35,7 @@ public class ElementOld implements Draw {
     public ElementOld(int x, int y) {
         this.x = x;
         this.y = y;
-        this.image = Game.getMaterial("material");
+        this.image = ImageUtil.getMaterial("material");
         this.isLive = true;
     }
 

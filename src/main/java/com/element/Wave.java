@@ -4,6 +4,7 @@ import com.element.tank.Enemy;
 import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 
 import java.awt.Graphics;
 import java.util.List;
@@ -53,7 +54,7 @@ public class Wave extends Bullet {
 
     @Override
     public void draw(Graphics g) {
-        setImage(Game.getMaterial("wave").getSubimage(getDirect().ordinal() * 192, 0, 192, 192));
+        setImage(ImageUtil.getSubImage192("wave",getDirect().ordinal() * 192, 0 ));
         g.drawImage(getImage(), getX(), getY(), 192, 192, Game.getStage());
         if (getIsLive()) {
             if (!Game.pause) {

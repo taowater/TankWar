@@ -13,6 +13,7 @@ import com.game.*;
 import com.history.core.util.EmptyUtil;
 import com.history.core.util.stream.Ztream;
 import com.scene.Stage;
+import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
 
@@ -74,7 +75,7 @@ public class Bullet extends MoveElement {
 
     @Override
     public void draw(Graphics g) {
-        setImage(Game.getMaterial("bullet").getSubimage(getDirect().ordinal() * 16, 0, 16, 16));
+        setImage(ImageUtil.getSubImage16("bullet",getDirect().ordinal() * 16, 0 ));
 
         if (!isTouch(master)) {
             g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());

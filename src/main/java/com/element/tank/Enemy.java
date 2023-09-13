@@ -7,6 +7,7 @@ import com.element.Fort;
 import com.element.enums.Direct;
 import com.game.Game;
 import com.history.core.util.EmptyUtil;
+import com.util.ImageUtil;
 import lombok.Data;
 
 import java.awt.*;
@@ -33,7 +34,7 @@ public class Enemy extends Tank {
         this.setSpeed(2);
         this.mask = 100;
         this.bitdead = false;
-        setImage(Game.getMaterial("enemy"));
+        setImage(ImageUtil.getMaterial("enemy"));
         init();
     }
 
@@ -53,12 +54,10 @@ public class Enemy extends Tank {
     @Override
     public void draw(Graphics g) {
         int offset = imageFlag ? 1 : 0;
-        setImage(Game.getMaterial("enemy").getSubimage(type * 28 * 4 + offset * 28, getDirect().ordinal() * 28, 28, 28));
+        setImage(ImageUtil.getSubImage28("enemy", type * 28 * 4 + offset * 28, getDirect().ordinal() * 28));
         imageFlag = !imageFlag;
-        if (withReward) {
-            if (flashtime > 1) {
-                setImage(Game.getMaterial("enemy").getSubimage(type * 28 * 4 + 2 * 28, getDirect().ordinal() * 28, 28, 28));
-            }
+        if (withReward && flashtime > 1) {
+            setImage(ImageUtil.getSubImage28("enemy", type * 28 * 4 + 2 * 28, getDirect().ordinal() * 28));
         }
         super.draw(g);
         if (!Game.pause && Game.stage.pausetime == 0) {
@@ -113,7 +112,7 @@ public class Enemy extends Tank {
 
     // 判断能否击中玩家
     private boolean canBit(ElementOld element) {
-        if (EmptyUtil.isEmpty(element)){
+        if (EmptyUtil.isEmpty(element)) {
             return false;
         }
         if (element.getIsLive()) {

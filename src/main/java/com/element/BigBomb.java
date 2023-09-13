@@ -3,6 +3,7 @@ package com.element;
 import com.element.Bomb;
 import com.element.ElementOld;
 import com.game.Game;
+import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
 
@@ -22,7 +23,7 @@ public class BigBomb extends Bomb {
 
     @Override
     public void draw(Graphics g) {
-        setImage(Game.getMaterial("material").getSubimage(64 + (4 - getLife()) * 32, 32, 32, 32));
+        setImage(ImageUtil.getSubImage32("material", 64 + (4 - getLife()) * 32, 32));
         super.draw(g);
     }
 

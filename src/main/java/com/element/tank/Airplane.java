@@ -3,6 +3,7 @@ package com.element.tank;
 import com.element.enums.Direct;
 import com.element.tank.Player;
 import com.game.Game;
+import com.util.ImageUtil;
 
 import java.awt.*;
 
@@ -10,7 +11,7 @@ public  class Airplane extends Player {
 
     public Airplane(int x, int y, int direct) {
         super(x, y, Direct.UP);
-        setImage(Game.getMaterial("飞机"));
+        setImage(ImageUtil.getMaterial("飞机"));
     }
 
     @Override

@@ -3,17 +3,16 @@ package com.game;
 import com.element.map.*;
 import com.history.core.util.Any;
 import com.scene.Stage;
+import com.util.ImageUtil;
 import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
@@ -23,12 +22,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
+@UtilityClass
 public class Game {
 
-    public static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
     public static final Map<Integer, int[][]> MAP_CACHE = new ConcurrentHashMap<>(0);
-
-    public static final BufferedImage materialImage = Game.getMaterial("material");
 
     public static boolean fogFlag = false;
     public static boolean pause = false;
@@ -184,21 +181,10 @@ public class Game {
         return map;
     }
 
-    @SneakyThrows
-    public static BufferedImage getMaterial(String imagePath) {
-        return IMAGE_CACHE.computeIfAbsent("image/" + imagePath + ".png", k -> {
-            try {
-                return ImageIO.read(new File(getPath(k)));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
     public static void drawText(String string, int x, int y, int color, Graphics g, JPanel panel) {
         int index = 0;
         BufferedImage wordimage = null;
-        BufferedImage words = getMaterial("words");
+        BufferedImage words = ImageUtil.getMaterial("words");
         for (char word : string.toCharArray()) {
             if (word >= 'A' && word <= 'Z') {
                 wordimage = words.getSubimage((word - 65) % 14 * 16, color * 48 + (word - 65) / 14 * 16, 16, 16);

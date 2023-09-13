@@ -3,6 +3,7 @@ package com.scene;
 import com.element.map.MapElement;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -50,14 +51,13 @@ public class MapEditor extends Scene {
     }
 
     private void drawMouse(int index, Graphics g) {
-        BufferedImage image = Game.getMaterial("map");
-        BufferedImage mouse = image.getSubimage(index * 16, 0, 16, 16);
+        BufferedImage mouse = ImageUtil.getSubImage16("map", index * 16, 0);
         g.drawImage(mouse, Mouse_x, Mouse_y, 16, 16, this);
     }
 
     private void drawMap(Graphics g) {
         int length = map.size();
-        Ztream.of(map).forEach(e->{
+        Ztream.of(map).forEach(e -> {
             e.draw(g, this);
             map_temp[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1;
         });

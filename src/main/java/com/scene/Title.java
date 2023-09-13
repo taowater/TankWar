@@ -5,6 +5,7 @@ import com.element.map.MapElement;
 import com.game.Game;
 import com.game.TankWar;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -39,7 +40,7 @@ public class Title extends Scene {
         this.logo = Game.getLogo(1);
         this.logo2 = Game.getLogo(2);
         setBounds(0, 0, TankWar.WIDTH, TankWar.HEIGHT);
-        tankImage = Game.getMaterial("player1");
+        tankImage = ImageUtil.getMaterial("player1");
     }
 
     @Override

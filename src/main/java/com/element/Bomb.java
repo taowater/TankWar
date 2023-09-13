@@ -1,6 +1,7 @@
 package com.element;
 
 import com.game.Game;
+import com.util.ImageUtil;
 import com.util.MusicUtil;
 
 import java.awt.*;
@@ -15,7 +16,7 @@ public class Bomb extends ElementOld {
 
     @Override
     public void draw(Graphics g) {
-        setImage(Game.getMaterial("material").getSubimage(2 * 32 + (4 - getLife()) * 32, 32, 32, 32));
+        setImage(ImageUtil.getSubImage32("material", 2 * 32 + (4 - getLife()) * 32, 32));
         g.drawImage(getImage(), getX(), getY(), getWidth(), getHeight(), Game.getStage());
         downLife();
     }

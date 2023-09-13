@@ -4,6 +4,7 @@ import com.element.enums.Direct;
 import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 
 import java.awt.*;
 
@@ -42,7 +43,7 @@ public class Laser extends Bullet {
 
     @Override
     public void draw(Graphics g) {
-        setImage(Game.getMaterial("bullet_2").getSubimage(getDirect().ordinal() * 16, 0, 16, 16));
+        setImage(ImageUtil.getSubImage16("bullet_2", getDirect().ordinal() * 16, 0));
         g.drawImage(getImage(), getX(), getY(), getWidth(), getHeight(), Game.getStage());
         if (getLife() > 0) {
             setLife(getLife() - 1);

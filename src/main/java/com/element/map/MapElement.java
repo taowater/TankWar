@@ -3,6 +3,7 @@ package com.element.map;
 import com.element.ElementOld;
 import com.element.enums.MapElementType;
 import com.game.Game;
+import com.util.ImageUtil;
 import lombok.Getter;
 
 /**
@@ -18,14 +19,14 @@ public class MapElement extends ElementOld {
 
     public MapElement(int x, int y, MapElementType mapType) {
         super(x, y);
-        this.setWidth(16) ;
-        this.setHeight(16) ;
+        this.setWidth(16);
+        this.setHeight(16);
         this.mapType = mapType;
         getImage(mapType.ordinal() + 1);
     }
 
     public void getImage(int i) {
-        setImage(Game.getMaterial("map").getSubimage((i - 1) * 16, 0, 16, 16));
+        setImage(ImageUtil.getSubImage16("map", (i - 1) * 16, 0));
     }
 }
 

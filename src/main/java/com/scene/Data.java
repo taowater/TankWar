@@ -3,6 +3,7 @@ package com.scene;
 import com.element.tank.Player;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
+import com.util.ImageUtil;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,7 +26,7 @@ public class Data extends Scene {
     }
 
     private void drawData(Graphics g) {
-        BufferedImage enemyIcon = Game.materialImage.getSubimage(144, 112, 16, 16);
+        BufferedImage enemyIcon = ImageUtil.getSubImage16("material",144, 112);
         g.drawImage(enemyIcon, 16, 16, 16, 16, this);
         Game.drawText(stage.enumber + "", 16, 16, 0, g, this);
 //		for (int i = 0; i < stage.enumber; i++) {
@@ -35,15 +36,15 @@ public class Data extends Scene {
             drawPlayer(e, g, i);
         });
 
-        BufferedImage qizhi = Game.materialImage.getSubimage(192, 64, 32, 32);
+        BufferedImage qizhi = ImageUtil.getSubImage32("material",192, 64);
         g.drawImage(qizhi, 16, 32 * 11 - 16, 32, 32, this);
         Game.drawText(Game.stagesth + "", 32, 32 * 11 + 16, 0, g, this);
     }
 
     private void drawPlayer(Player player, Graphics g, int i) {
-        BufferedImage hero = Game.materialImage.getSubimage(160 + i * 32, 112, 32, 16);
-        BufferedImage tank = Game.materialImage.getSubimage(160, 128, 15, 16);
-        BufferedImage bullet = Game.getMaterial("bullet").getSubimage(5, 4, 6, 8);
+        BufferedImage hero = ImageUtil.getSubImage("material",160 + i * 32, 112, 32, 16);
+        BufferedImage tank = ImageUtil.getSubImage("material",160, 128, 15, 16);
+        BufferedImage bullet = ImageUtil.getSubImage("bullet",5, 4, 6, 8);
 
         g.drawImage(hero, 16, 72 + 128 * i, 32, 16, this);
         g.drawImage(tank, 16, 72 + 128 * i + 32, 15, 16, this);
