@@ -1,7 +1,6 @@
 package com.scene;
 
 import com.element.map.Brick;
-import com.element.map.MapElement;
 import com.game.Game;
 import com.game.TankWar;
 import com.history.core.util.stream.Ztream;
@@ -55,8 +54,8 @@ public class Title extends Scene {
 
         Ztream.of(logoRemove).forEach(e -> {
             if (e.getY() > 0 && e.getX() < TankWar.WIDTH) {
-                e.setY(e.getY() - Game.Rand(10));
-                e.setX(e.getX() + Game.Rand(24));
+                e.setY(e.getY() - Game.rand(10));
+                e.setX(e.getX() + Game.rand(24));
             } else {
                 e.setIsLive(false);
             }
@@ -143,7 +142,7 @@ public class Title extends Scene {
     @Override
     public void run() {
         while (true) {
-            if (Game.Rand(5) < 2 && logo2.size() > 1) {
+            if (Game.rand(5) < 2 && logo2.size() > 1) {
                 Collections.shuffle(logo2);
                 Brick brick = logo2.get(0);
                 logo2.remove(brick);

@@ -81,7 +81,7 @@ public class Game {
         return 0;
     }
 
-    public static int Rand(int n) {
+    public static int rand(int n) {
         return (int) (Math.random() * n);
     }
 

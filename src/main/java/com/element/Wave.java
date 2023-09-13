@@ -1,13 +1,11 @@
 package com.element;
 
-import com.element.tank.Enemy;
 import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import com.util.ImageUtil;
 
 import java.awt.Graphics;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -43,7 +41,7 @@ public class Wave extends Bullet {
     @Override
     public boolean bitTank() {
         AtomicBoolean flag = new AtomicBoolean(false);
-        Ztream.of(Game.getStage().getEnemys()).parallel().forEach(e -> {
+        Ztream.of(Game.getStage().getEnemies()).parallel().forEach(e -> {
             if (isTouch(e)) {
                 e.setIsLive(false);
                 flag.set(true);

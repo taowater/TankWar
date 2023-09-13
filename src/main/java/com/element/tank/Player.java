@@ -3,8 +3,6 @@ package com.element.tank;
 import com.element.Flash;
 import com.element.enums.Direct;
 import com.element.enums.MapElementType;
-import com.element.map.MapElement;
-import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import com.util.ImageUtil;
@@ -55,13 +53,13 @@ public class Player extends Tank {
                 flash.draw(g);
             }
             if (!Game.pause) {
-                setOldXY();
+                setOldPosition();
                 active();
                 beRewarded();
             }
         } else {
             if (maxlife > 0) {
-                Reborn();
+                reborn();
             }
         }
     }
@@ -70,21 +68,17 @@ public class Player extends Tank {
     void active() {
         long time = System.currentTimeMillis();
         for (int i = 0; i < 4; i++) {
-            if (ACTIVE[i] || getGoing()) {
-                if (time - moveLastTime >= 20) {
-                    moveLastTime = time;
-                    if (!getGoing()) {
-                        setDirect(newDirect);
-                    }
-                    move();
+            if ((ACTIVE[i] || getGoing()) && time - moveLastTime >= 20) {
+                moveLastTime = time;
+                if (!getGoing()) {
+                    setDirect(newDirect);
                 }
+                move();
             }
         }
-        if (ACTIVE[4]) {
-            if (time - shootLastTime >= 500) {
-                shoot();
-                shootLastTime = time;
-            }
+        if (ACTIVE[4] && time - shootLastTime >= 500) {
+            shoot();
+            shootLastTime = time;
         }
     }
 
@@ -92,7 +86,7 @@ public class Player extends Tank {
     void beRewarded() {
         Ztream.of(Game.getStage().getRewards()).forEach(e -> {
             if (getRect().intersects(e.getRect())) {
-                Game.stage.Reward(this, e);
+                Game.stage.reward(this, e);
                 e.setIsLive(false);
                 MusicUtil.play("奖励");
             }
@@ -115,16 +109,14 @@ public class Player extends Tank {
 
     void clearBrick() {
         Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
-            if (isTouch(e)) {
-                if (e.getMapType() == MapElementType.BRICK) {
-                    MusicUtil.play("移动");
-                    Game.getStage().removeElement(e);
-                }
+            if (isTouch(e) && e.getMapType() == MapElementType.BRICK) {
+                MusicUtil.play("移动");
+                Game.getStage().removeElement(e);
             }
         });
     }
 
-    void Reborn() {
+    void reborn() {
         setX(32 * 4);
         setY(32 * 12);
         if (this.DIRECTKEY == Game.PlayerDIRECT[1]) {
@@ -141,38 +133,37 @@ public class Player extends Tank {
         initMove();
     }
 
-    public void KeyPressed(KeyEvent e) {
-        if (getIsLive()) {
-            for (int i = 0; i < 5; i++) {
-                if (e.getKeyCode() == DIRECTKEY[i]) {
-                    ACTIVE[i] = true;
-                    if (i < 4) {
-                        newDirect = Direct.get(i);
-                    }
+    public void keyPressed(KeyEvent e) {
+        if (!getIsLive()) {
+            return;
+        }
+        for (int i = 0; i < 5; i++) {
+            if (e.getKeyCode() == DIRECTKEY[i]) {
+                ACTIVE[i] = true;
+                if (i < 4) {
+                    newDirect = Direct.get(i);
                 }
             }
         }
     }
 
     public void keyReleased(KeyEvent e) {
-        if (getIsLive()) {
-            for (int i = 0; i < 5; i++) {
-                if (e.getKeyCode() == DIRECTKEY[i]) {
-                    ACTIVE[i] = false;
-                }
-            }
-            if (e.getKeyCode() == KeyEvent.VK_1) {
-                bulletType = 0;
-            } else if (e.getKeyCode() == KeyEvent.VK_2) {
-                bulletType = 1;
-            } else if (e.getKeyCode() == KeyEvent.VK_3) {
-                bulletType = 2;
-            } else if (e.getKeyCode() == KeyEvent.VK_4) {
-                bulletType = 3;
-            } else if (e.getKeyCode() == KeyEvent.VK_5) {
-                bulletType = 4;
+        if (!getIsLive()) {
+            return;
+        }
+        for (int i = 0; i < 5; i++) {
+            if (e.getKeyCode() == DIRECTKEY[i]) {
+                ACTIVE[i] = false;
             }
         }
+        bulletType = switch (e.getKeyCode()) {
+            case KeyEvent.VK_1 -> 0;
+            case KeyEvent.VK_2 -> 1;
+            case KeyEvent.VK_3 -> 2;
+            case KeyEvent.VK_4 -> 3;
+            case KeyEvent.VK_5 -> 4;
+            default -> bulletType;
+        };
     }
 }
 

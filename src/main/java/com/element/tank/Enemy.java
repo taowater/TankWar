@@ -6,15 +6,23 @@ import com.element.ElementOld;
 import com.element.Fort;
 import com.element.enums.Direct;
 import com.game.Game;
+import com.history.core.util.Any;
 import com.history.core.util.EmptyUtil;
 import com.util.ImageUtil;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.awt.*;
 import java.util.List;
 
-// 敌方坦克的类
+/**
+ * 敌方坦克
+ *
+ * @author zhu56
+ * @date 2023/09/14 01:21
+ */// 敌方坦克的类
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Enemy extends Tank {
 
     private int target = 0;
@@ -34,7 +42,6 @@ public class Enemy extends Tank {
         this.setSpeed(2);
         this.mask = 100;
         this.bitdead = false;
-        setImage(ImageUtil.getMaterial("enemy"));
         init();
     }
 
@@ -42,7 +49,7 @@ public class Enemy extends Tank {
         if (type == 1) {
             this.mask = 200;
             setSpeed(4);
-            target = Game.Rand(25);
+            target = Game.rand(25);
         } else if (type == 2) {
             this.mask = 300;
         } else if (type == 3) {
@@ -54,15 +61,13 @@ public class Enemy extends Tank {
     @Override
     public void draw(Graphics g) {
         int offset = imageFlag ? 1 : 0;
-        setImage(ImageUtil.getSubImage28("enemy", type * 28 * 4 + offset * 28, getDirect().ordinal() * 28));
         imageFlag = !imageFlag;
-        if (withReward && flashtime > 1) {
-            setImage(ImageUtil.getSubImage28("enemy", type * 28 * 4 + 2 * 28, getDirect().ordinal() * 28));
-        }
+        int tempX = withReward && flashtime > 1 ? type * 28 * 4 + 2 * 28 : type * 28 * 4 + offset * 28;
+        setImage(ImageUtil.getSubImage28("enemy", tempX, getDirect().ordinal() * 28));
         super.draw(g);
         if (!Game.pause && Game.stage.pausetime == 0) {
             if (getX() % 16 == 0 && getY() % 16 == 0) {
-                setOldXY();
+                setOldPosition();
                 setGoing(false);
             } else {
                 setGoing(true);
@@ -71,7 +76,7 @@ public class Enemy extends Tank {
                 switch (type) {
                     case 0 -> {
                         randomGo();
-                        if (Game.Rand(60) == 1) {
+                        if (Game.rand(60) == 1) {
                             shoot();
                         }
                     }
@@ -81,22 +86,23 @@ public class Enemy extends Tank {
                         } else {
                             randomGo();
                         }
-                        if (canBit(Game.stage.fort) && Game.Rand(30) == 1) {
+                        if (canBit(Game.stage.fort) && Game.rand(30) == 1) {
                             shoot();
                         }
                     }
                     case 2 -> {
                         randomGo();
-                        if (canBit(Game.stage.getAnyPlayer()) && Game.Rand(50) == 1) {
+                        if (canBit(Game.stage.getAnyPlayer()) && Game.rand(50) == 1) {
                             shoot();
                         }
                     }
                     case 3 -> {
                         trackMove();
-                        if (canBit(Game.stage.getAnyPlayer()) && Game.Rand(10) == 1) {
+                        if (canBit(Game.stage.getAnyPlayer()) && Game.rand(10) == 1) {
                             shoot();
                         }
                     }
+                    default -> throw new IllegalStateException("Unexpected value: " + type);
                 }
             }
         }
@@ -120,13 +126,10 @@ public class Enemy extends Tank {
             int y = getY();
             Direct direct = getDirect();
             if (getX() == element.getX()) {
-                if ((y > element.getY() && direct == Direct.UP) || (y < element.getY() && direct == Direct.DOWN)) {
-                    return true;
-                }
-            } else if (y == element.getY()) {
-                if ((getX() < element.getX() && direct == Direct.RIGHT) || (x > element.getX() && direct == Direct.LEFT)) {
-                    return true;
-                }
+                return (y > element.getY() && direct == Direct.UP) || (y < element.getY() && direct == Direct.DOWN);
+            }
+            if (y == element.getY()) {
+                return ((getX() < element.getX() && direct == Direct.RIGHT) || (x > element.getX() && direct == Direct.LEFT));
             }
         }
         return false;
@@ -134,29 +137,29 @@ public class Enemy extends Tank {
 
     // 追袭玩家
     private void trackMove() {
-        if (EmptyUtil.isNotEmpty(Game.stage.getPlayers())) {
-            Player player = Game.stage.getPlayers().get(0);
-            if (player != null && player.getIsLive()) {
-                int i = player.getY() / 16;
-                int j = player.getX() / 16;
-                if (i > 0 && j > 0 && player.getIsLive()) {
-                    if (!getGoing()) {
-                        int[][] currenMap = getCurrentMap(Game.tankcango);
-                        List<Point> path = new AStar(currenMap, getY() / 16, getX() / 16, i, j).search();
-                        if (EmptyUtil.isNotEmpty(path)) {
-                            Point point = path.get(path.size() - 1);
-                            this.setDirect(getNextStep(point.x, point.y));
-                        }
-                    }
-                }
-                move();
-                if (isTouchOtherTanks() || isTouchWall()) {
-                    stay();
-                }
-            } else {
-                randomGo();
+        if (EmptyUtil.isEmpty(Game.stage.getPlayers())) {
+            return;
+        }
+        Player player = Game.stage.getPlayers().get(0);
+        if (!Any.of(player).get(Player::getIsLive, false)) {
+            randomGo();
+            return;
+        }
+        int i = player.getY() / 16;
+        int j = player.getX() / 16;
+        if (i > 0 && j > 0 && !getGoing()) {
+            int[][] currenMap = getCurrentMap(Game.tankcango);
+            List<Point> path = new AStar(currenMap, getY() / 16, getX() / 16, i, j).search();
+            if (EmptyUtil.isNotEmpty(path)) {
+                Point point = path.get(path.size() - 1);
+                this.setDirect(getNextStep(point.x, point.y));
             }
         }
+        move();
+        if (isTouchOtherTanks() || isTouchWall()) {
+            stay();
+        }
+
     }
 
     // 偷袭碉堡
@@ -185,7 +188,7 @@ public class Enemy extends Tank {
         move();
         if (isTouchOtherTanks() || isTouchWall()) {
             stay();
-            Direct newDirect = Game.Rand(2) > 0 ? Direct.getR(getDirect()) : Direct.getL(getDirect());
+            Direct newDirect = Game.rand(2) > 0 ? Direct.getR(getDirect()) : Direct.getL(getDirect());
             setDirect(newDirect);
         }
     }

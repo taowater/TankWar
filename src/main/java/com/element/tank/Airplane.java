@@ -1,7 +1,6 @@
 package com.element.tank;
 
 import com.element.enums.Direct;
-import com.element.tank.Player;
 import com.game.Game;
 import com.util.ImageUtil;
 
@@ -31,13 +30,13 @@ public  class Airplane extends Player {
                 flash.draw(g);
             }
             if (!Game.pause) {
-                setOldXY();
+                setOldPosition();
                 active();
                 beRewarded();
             }
         } else {
             if (getMaxlife() > 0) {
-                Reborn();
+                reborn();
             }
         }
     }

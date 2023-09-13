@@ -17,10 +17,8 @@ public class Water extends MapElement {
 
     @Override
     public void draw(Graphics g) {
-        if (getIsLive()) {
-            setImage(ImageUtil.getSubImage16("map", 3 * 16, (flag % 2) * 16));
-            g.drawImage(getImage(), getX(), getY(), 16, 16, Game.getStage());
-            flag = RangeUtil.right(0, flag, 4);
-        }
+        setImage(ImageUtil.getSubImage16("map", 3 * 16, (flag % 2) * 16));
+        g.drawImage(getImage(), getX(), getY(), 16, 16, Game.getStage());
+        flag = RangeUtil.right(0, flag, 4);
     }
 }

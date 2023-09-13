@@ -6,6 +6,7 @@ import com.element.enums.MapElementType;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;

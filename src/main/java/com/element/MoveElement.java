@@ -5,11 +5,13 @@ import com.element.enums.MapElementType;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.EnumMap;
 
 // 可移动元素块的类
 @Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class MoveElement extends ElementOld {
 
     private int oldX;
@@ -22,16 +24,9 @@ public abstract class MoveElement extends ElementOld {
     private Boolean going = false;
 
 
-    public MoveElement(int x, int y, Direct direct) {
+    protected MoveElement(int x, int y, Direct direct) {
         super(x, y);
         this.direct = direct;
-    }
-
-    int getL(int direct) {
-        if (direct == 0) {
-            return 3;
-        }
-        return direct - 1;
     }
 
     // 移动
@@ -45,23 +40,25 @@ public abstract class MoveElement extends ElementOld {
                     incrY(speed);
             case LEFT ->// 左
                     decrX(speed);
+            default -> throw new IllegalStateException("Unexpected value: " + this.direct);
         }
     }
 
-    // 获取当前战场二维通行图
+    /**
+     * 获取当前战场二维通行图
+     *
+     * @param cango
+     * @return {@link int[][]}
+     */
     public int[][] getCurrentMap(boolean[] cango) {
         int[][] map = Game.getStageMap();
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 if (i == map.length - 1 || j == map[0].length - 1) {
                     map[i][j] = 1;
-                } else {
-                    if (cango[map[i][j]] && cango[map[i][j + 1]] && cango[map[i + 1][j]] && cango[map[i + 1][j + 1]]) {
-                        map[i][j] = 0;
-                    } else {
-                        map[i][j] = 1;
-                    }
+                    continue;
                 }
+                map[i][j] = (cango[map[i][j]] && cango[map[i][j + 1]] && cango[map[i + 1][j]] && cango[map[i + 1][j + 1]]) ? 0 : 1;
             }
         }
         Ztream.of(Game.getStage().getTanks()).forEach(tank -> {
@@ -85,7 +82,7 @@ public abstract class MoveElement extends ElementOld {
     }
 
     // 记录上一个可移动的坐标
-    public void setOldXY() {
+    public void setOldPosition() {
         setOldX(getX());
         setOldY(getY());
     }

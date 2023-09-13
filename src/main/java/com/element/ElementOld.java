@@ -6,6 +6,7 @@ import com.scene.Scene;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -18,6 +19,7 @@ import java.awt.image.BufferedImage;
  * @date 2023/09/12 21:17
  */
 @Data
+@NoArgsConstructor
 public class ElementOld implements Draw {
     // x坐标
     private int x;
@@ -35,10 +37,8 @@ public class ElementOld implements Draw {
     public ElementOld(int x, int y) {
         this.x = x;
         this.y = y;
-        this.image = ImageUtil.getMaterial("material");
         this.isLive = true;
     }
-
 
 
     public boolean isInStage() {

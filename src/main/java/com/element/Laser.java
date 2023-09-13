@@ -8,6 +8,12 @@ import com.util.ImageUtil;
 
 import java.awt.*;
 
+/**
+ * 激光
+ *
+ * @author zhu56
+ * @date 2023/09/14 00:43
+ */
 public class Laser extends Bullet {
 
     public Laser(Tank master, Direct direct) {
@@ -32,10 +38,13 @@ public class Laser extends Bullet {
                 setWidth(16 * reach);
                 this.setX(master.getX() - getWidth());
             }
+            default -> {
+            }
         }
         length();
     }
 
+    @Override
     public void death() {
         setIsLive(false);
         getMaster().decrBulletNum();
@@ -87,6 +96,8 @@ public class Laser extends Bullet {
                     case LEFT -> {
                         eWidth = masterX - (eX + eWidth);
                         setX(masterX - eWidth);
+                    }
+                    default -> {
                     }
                 }
             }

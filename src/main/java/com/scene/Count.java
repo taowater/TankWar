@@ -2,8 +2,6 @@ package com.scene;
 
 import com.game.Game;
 import com.game.TankWar;
-import com.scene.Scene;
-import com.scene.Stage;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -25,8 +23,8 @@ public class Count extends Scene {
 
     public Count() {
         setBounds(0, 0, TankWar.WIDTH, TankWar.HEIGHT);
-        this.level = Stage.CountData.level;
-        this.level2 = Stage.CountData.level2;
+        this.level = Stage.CountData.LEVEL;
+        this.level2 = Stage.CountData.LEVEL_2;
         sum_mask = level[0] * 100 + level[1] * 200 + level[2] * 300 + level[3] * 500;
         sum_mask2 = level2[0] * 100 + level2[1] * 200 + level2[2] * 300 + level2[3] * 500;
         sum = this.level[0] + this.level[1] + this.level[2] + this.level[3];

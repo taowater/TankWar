@@ -41,12 +41,9 @@ public class AStar {
     // 获取G值 currentNode：当前节点 return
     private int getG(Node currentNode) {
         Node fatherNode = currentNode.fatherNode;
-        if (fatherNode != null) {
-
-            if (currentNode.x == fatherNode.x || currentNode.y == fatherNode.y) {
-                // 判断当前节点与其父节点之间的位置关系（水平？对角线）
-                return currentNode.g + 1;
-            }
+        if (fatherNode != null && (currentNode.x == fatherNode.x || currentNode.y == fatherNode.y)) {
+            // 判断当前节点与其父节点之间的位置关系（水平？对角线）
+            return currentNode.g + 1;
         }
         return currentNode.g;
     }
@@ -64,28 +61,28 @@ public class AStar {
         int[] directList = {0, 1, 2, 3};
         int direct = Game.getAinBdirection(new Point(node.y, node.x), new Point(endNode.y, endNode.x));
 
-        int Xvalue = Math.abs(endNode.y - node.y);
-        int Yvalue = Math.abs(endNode.x - node.x);
+        int xValue = Math.abs(endNode.y - node.y);
+        int yValue = Math.abs(endNode.x - node.x);
         if (direct == 4) {
-            if (Xvalue > Yvalue) {
+            if (xValue > yValue) {
                 directList = new int[]{1, 2, 0, 3};
             } else {
                 directList = new int[]{2, 1, 3, 0};
             }
         } else if (direct == 5) {
-            if (Xvalue > Yvalue) {
+            if (xValue > yValue) {
                 directList = new int[]{3, 2, 0, 1};
             } else {
                 directList = new int[]{2, 3, 1, 0};
             }
         } else if (direct == 6) {
-            if (Xvalue > Yvalue) {
+            if (xValue > yValue) {
                 directList = new int[]{3, 0, 2, 1};
             } else {
                 directList = new int[]{0, 3, 1, 2};
             }
         } else if (direct == 7) {
-            if (Xvalue > Yvalue) {
+            if (xValue > yValue) {
                 directList = new int[]{1, 0, 2, 3};
             } else {
                 directList = new int[]{0, 1, 3, 2};
@@ -93,15 +90,13 @@ public class AStar {
         }
         for (int i = 0; i < 4; i++) {
             Node node2 = getDirectNode(node, directList[i]);
-            if (node2 != null) {
-                if (node2.cango && !open.contains(node2)) {
-                    node2.fatherNode = map[x][y];
-                    // 将选中节点作为父节点
-                    node2.g = getG(node2);
-                    node2.h = getH(node2, endNode);
-                    node2.f = getF(node2);
-                    open.add(node2);
-                }
+            if (node2 != null && (node2.cango && !open.contains(node2))) {
+                node2.fatherNode = map[x][y];
+                // 将选中节点作为父节点
+                node2.g = getG(node2);
+                node2.h = getH(node2, endNode);
+                node2.f = getF(node2);
+                open.add(node2);
             }
         }
     }
@@ -210,6 +205,7 @@ public class AStar {
                     return map[node.x + 1][node.y - 1];
                 }
             }
+            default -> throw new IllegalStateException("Unexpected value: " + direct);
         }
         return null;
     }

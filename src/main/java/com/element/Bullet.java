@@ -16,6 +16,7 @@ import com.scene.Stage;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.awt.*;
 import java.util.*;
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 //子弹的类
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Bullet extends MoveElement {
     private Tank master;
     boolean canTurn;
@@ -86,7 +88,7 @@ public class Bullet extends MoveElement {
         if (!isInStage()) {
             death();
         }
-        setOldXY();
+        setOldPosition();
         normalFly();
         if (canTurn) {
             guaiwan();
@@ -141,12 +143,12 @@ public class Bullet extends MoveElement {
             } else if (tank instanceof Enemy enemy) {
                 if (master instanceof Player player) {
                     if (Game.stage.getPlayers().size() < 2) {
-                        Stage.CountData.level[enemy.getType()]++;
+                        Stage.CountData.LEVEL[enemy.getType()]++;
                     } else {
                         if (master == Game.stage.getPlayers().get(0)) {
-                            Stage.CountData.level[enemy.getType()]++;
+                            Stage.CountData.LEVEL[enemy.getType()]++;
                         } else {
-                            Stage.CountData.level2[enemy.getType()]++;
+                            Stage.CountData.LEVEL_2[enemy.getType()]++;
                         }
                     }
                     enemy.death();
@@ -303,13 +305,13 @@ public class Bullet extends MoveElement {
     }
 
     private void guaiwan() {
-        List<Enemy> tanks = Game.getStage().getEnemys();
+        List<Enemy> tanks = Game.getStage().getEnemies();
         if (EmptyUtil.isNotEmpty(tanks)) {
             TrackFly(tanks.get(0));
         } else {
             if (isTouchWall()) {
                 stay();
-                if (Game.Rand(2) == 0) {
+                if (Game.rand(2) == 0) {
                     setDirect(Direct.getR(getDirect()));
                 } else {
                     setDirect(Direct.getL(getDirect()));
