@@ -1,8 +1,11 @@
 package com.ai;
 
+import com.element.enums.Direct;
 import com.game.Game;
 import com.history.core.util.Any;
 import com.history.core.util.EmptyUtil;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.awt.Point;
 import java.util.ArrayList;
@@ -37,31 +40,31 @@ public class AStar {
 
     // 获取H值 currentNode：当前节点 endNode：终点
     private int getH(Node currentNode, Node endNode) {
-        return (Math.abs(currentNode.x - endNode.x) + Math.abs(currentNode.y - endNode.y));
+        return (Math.abs(currentNode.getX() - endNode.getX()) + Math.abs(currentNode.getY() - endNode.getY()));
     }
 
     // 获取G值 currentNode：当前节点 return
     private int getG(Node currentNode) {
-        Node fatherNode = currentNode.fatherNode;
-        if (fatherNode != null && (currentNode.x == fatherNode.x || currentNode.y == fatherNode.y)) {
+        Node fatherNode = currentNode.getFatherNode();
+        if (fatherNode != null && (currentNode.getX() == fatherNode.getX() || currentNode.getY() == fatherNode.getY())) {
             // 判断当前节点与其父节点之间的位置关系（水平？对角线）
-            return currentNode.g + 1;
+            return currentNode.getG() + 1;
         }
-        return currentNode.g;
+        return currentNode.getG();
     }
 
     // 获取F值 ： G + H currentNode return
     private int getF(Node currentNode) {
-        return currentNode.g + currentNode.h;
+        return currentNode.getG() + currentNode.getH();
     }
 
     // 将选中节点周围的节点添加进“开启列表” node
     private void inOpen(Node node) {
 
-        int x = node.x;
-        int y = node.y;
-        int endX = endNode.x;
-        int endY = endNode.y;
+        int x = node.getX();
+        int y = node.getY();
+        int endX = endNode.getX();
+        int endY = endNode.getY();
         int[] directList = {0, 1, 2, 3};
         int direct = Game.getAinBdirection(new Point(y, x), new Point(endY, endX));
 
@@ -93,13 +96,13 @@ public class AStar {
             }
         }
         for (int i = 0; i < 4; i++) {
-            Node node2 = getDirectNode(node, directList[i]);
-            if (node2 != null && (node2.cango && !open.contains(node2))) {
-                node2.fatherNode = map[x][y];
+            Node node2 = getDirectNode(node, Direct.get(directList[i]));
+            if (node2 != null && (node2.getCango() && !open.contains(node2))) {
+                node2.setFatherNode(map[x][y]);
                 // 将选中节点作为父节点
-                node2.g = getG(node2);
-                node2.h = getH(node2, endNode);
-                node2.f = getF(node2);
+                node2.setG(getG(node2));
+                node2.setH(getH(node2, endNode));
+                node2.setF(getF(node2));
                 open.add(node2);
             }
         }
@@ -108,7 +111,7 @@ public class AStar {
     // 将节点添加进“关闭列表”
     private void inClose(Node node, List<Node> open) {
         if (open.contains(node)) {
-            node.cango = false;
+            node.setCango(false);
             // 设置为不可达
             open.remove(node);
             close.add(node);
@@ -116,84 +119,90 @@ public class AStar {
     }
 
     public List<Point> search() {
+        var endX = endNode.getX();
+        var endY = endNode.getY();
         // 对起点即起点周围的节点进行操作
-        if (endNode == null || !map[endNode.x][endNode.y].cango) {
+        if (endNode == null || !map[endX][endY].getCango()) {
             for (int i = 0; i < 8; i++) {
-                Node newEnd = getDirectNode(endNode, i);
-                if (newEnd == null || !map[newEnd.x][newEnd.y].cango) {
+                Node newEnd = getDirectNode(endNode, Direct.get(i));
+                if (newEnd == null || !map[newEnd.getX()][newEnd.getY()].getCango()) {
                     continue;
                 }
                 endNode = newEnd;
                 return search();
             }
         }
-        inOpen(map[startNode.x][startNode.y]);
-        close.add(map[startNode.x][startNode.y]);
-        map[startNode.x][startNode.y].cango = false;
-        map[startNode.x][startNode.y].fatherNode = map[startNode.x][startNode.y];
-        Any.of(open).ifPresent(l -> l.sort(Comparator.comparing(n -> n.f)));
+        var startX = startNode.getX();
+        var startY = startNode.getY();
+        inOpen(map[startX][startY]);
+        close.add(map[startX][startY]);
+        map[startX][startY].setCango(false);
+        map[startX][startY].setFatherNode(map[startX][startY]);
+        Any.of(open).ifPresent(l -> l.sort(Comparator.comparing(Node::getF)));
         // 重复步骤
         do {
             if (EmptyUtil.isNotEmpty(open)) {
                 inOpen(open.get(0));
                 inClose(open.get(0), open);
             }
-        } while (EmptyUtil.isNotEmpty(open) && !open.contains(map[endNode.x][endNode.y]));
+        } while (EmptyUtil.isNotEmpty(open) && !open.contains(map[endX][endY]));
         // 知道开启列表中包含终点时，循环退出
-        inClose(map[endNode.x][endNode.y], open);
+        inClose(map[endX][endY], open);
         List<Point> path = null;
         if (EmptyUtil.isNotEmpty(close)) {
             path = new ArrayList<>();
-            Node node = map[endNode.x][endNode.y];
-            while (node != null && !(node.x == startNode.x && node.y == startNode.y)) {
-                Point point = new Point(node.x, node.y);
+            Node node = map[endX][endY];
+            while (node != null && !(node.getX() == startX && node.getY() == startY)) {
+                Point point = new Point(node.getX(), node.getY());
                 path.add(point);
-                node = node.fatherNode;
+                node = node.getFatherNode();
             }
         }
         return path;
     }
 
-    private Node getDirectNode(Node node, int direct) {
+    private Node getDirectNode(Node node, Direct direct) {
+        var x = node.getX();
+        var y = node.getY();
         switch (direct) {
-            case 0 -> {
-                if (node.x - 1 >= 0) {
-                    return map[node.x - 1][node.y];
+            case UP -> {
+                if (x - 1 >= 0) {
+                    return map[x - 1][y];
                 }
             }
-            case 1 -> {
-                if (node.y + 1 < map[0].length) {
-                    return map[node.x][node.y + 1];
+            case RIGHT -> {
+                if (y + 1 < map[0].length) {
+                    return map[x][y + 1];
                 }
             }
-            case 2 -> {
-                if (node.x + 1 < map.length) {
-                    return map[node.x + 1][node.y];
+            case DOWN -> {
+                if (x + 1 < map.length) {
+                    return map[x + 1][y];
                 }
             }
-            case 3 -> {
-                if (node.y - 1 >= 0) {
-                    return map[node.x][node.y - 1];
+            case LEFT -> {
+                if (y - 1 >= 0) {
+                    return map[x][y - 1];
                 }
             }
-            case 4 -> {
-                if (node.x - 1 >= 0 && node.y - 1 >= 0) {
-                    return map[node.x - 1][node.y - 1];
+            case LEFT_UP -> {
+                if (x - 1 >= 0 && y - 1 >= 0) {
+                    return map[x - 1][y - 1];
                 }
             }
-            case 5 -> {
-                if (node.x - 1 >= 0 && node.y + 1 < map[0].length) {
-                    return map[node.x - 1][node.y + 1];
+            case RIGHT_UP -> {
+                if (x - 1 >= 0 && y + 1 < map[0].length) {
+                    return map[x - 1][y + 1];
                 }
             }
-            case 6 -> {
-                if (node.x + 1 < map.length && node.y + 1 < map[0].length) {
-                    return map[node.x + 1][node.y + 1];
+            case RIGHT_DOWN -> {
+                if (x + 1 < map.length && y + 1 < map[0].length) {
+                    return map[x + 1][y + 1];
                 }
             }
-            case 7 -> {
-                if (node.x + 1 < map.length && node.y - 1 >= 0) {
-                    return map[node.x + 1][node.y - 1];
+            case LEFT_DOWN -> {
+                if (x + 1 < map.length && y - 1 >= 0) {
+                    return map[x + 1][y - 1];
                 }
             }
             default -> throw new IllegalStateException("Unexpected value: " + direct);
@@ -202,19 +211,24 @@ public class AStar {
     }
 }
 
+@Data
+@NoArgsConstructor
 class Node {
-    final int x; // x坐标
-    final int y; // y坐标
-    int f = 0; // F值
-    int g = 0; // G值
-    int h = 0; // H值
-    boolean cango; // 是否可到达（是否为障碍物）
-    Node fatherNode; // 父节点
+    private int x; // x坐标
+    private int y; // y坐标
+    private int f; // F值
+    private int g; // G值
+    private int h; // H值
+    private Boolean cango; // 是否可到达（是否为障碍物）
+    private Node fatherNode; // 父节点
 
     public Node(int x, int y, boolean reachable) {
         super();
         this.x = x;
         this.y = y;
+        this.f = 0;
+        this.g = 0;
+        this.h = 0;
         this.cango = reachable;
     }
 }
