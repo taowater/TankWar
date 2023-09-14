@@ -123,7 +123,7 @@ public class AStar {
         if (endNode == null || !endNode.getCango()) {
             for (int i = 0; i < 8; i++) {
                 Node newEnd = getDirectNode(endNode, Direct.get(i));
-                if (newEnd == null || !map[newEnd.getX()][newEnd.getY()].getCango()) {
+                if (newEnd == null || !newEnd.getCango()) {
                     continue;
                 }
                 endNode = newEnd;
@@ -132,8 +132,6 @@ public class AStar {
         }
         var startX = startNode.getX();
         var startY = startNode.getY();
-        var endX = endNode.getX();
-        var endY = endNode.getY();
         inOpen(startNode);
         close.add(startNode);
         startNode.setCango(false);
@@ -151,7 +149,7 @@ public class AStar {
         List<Point> path = null;
         if (EmptyUtil.isNotEmpty(close)) {
             path = new ArrayList<>();
-            Node node = map[endX][endY];
+            Node node = endNode;
             while (node != null && !(node.getX() == startX && node.getY() == startY)) {
                 Point point = new Point(node.getX(), node.getY());
                 path.add(point);
