@@ -119,10 +119,8 @@ public class AStar {
     }
 
     public List<Point> search() {
-        var endX = endNode.getX();
-        var endY = endNode.getY();
         // 对起点即起点周围的节点进行操作
-        if (endNode == null || !map[endX][endY].getCango()) {
+        if (endNode == null || !endNode.getCango()) {
             for (int i = 0; i < 8; i++) {
                 Node newEnd = getDirectNode(endNode, Direct.get(i));
                 if (newEnd == null || !map[newEnd.getX()][newEnd.getY()].getCango()) {
@@ -134,10 +132,12 @@ public class AStar {
         }
         var startX = startNode.getX();
         var startY = startNode.getY();
-        inOpen(map[startX][startY]);
-        close.add(map[startX][startY]);
-        map[startX][startY].setCango(false);
-        map[startX][startY].setFatherNode(map[startX][startY]);
+        var endX = endNode.getX();
+        var endY = endNode.getY();
+        inOpen(startNode);
+        close.add(startNode);
+        startNode.setCango(false);
+        startNode.setFatherNode(startNode);
         Any.of(open).ifPresent(l -> l.sort(Comparator.comparing(Node::getF)));
         // 重复步骤
         do {
@@ -145,7 +145,7 @@ public class AStar {
                 inOpen(open.get(0));
                 inClose(open.get(0), open);
             }
-        } while (EmptyUtil.isNotEmpty(open) && !open.contains(map[endX][endY]));
+        } while (EmptyUtil.isNotEmpty(open) && !open.contains(endNode));
         // 知道开启列表中包含终点时，循环退出
         inClose(map[endX][endY], open);
         List<Point> path = null;
