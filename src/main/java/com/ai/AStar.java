@@ -147,7 +147,7 @@ public class AStar {
             }
         } while (EmptyUtil.isNotEmpty(open) && !open.contains(endNode));
         // 知道开启列表中包含终点时，循环退出
-        inClose(map[endX][endY], open);
+        inClose(endNode, open);
         List<Point> path = null;
         if (EmptyUtil.isNotEmpty(close)) {
             path = new ArrayList<>();
