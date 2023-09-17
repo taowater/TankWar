@@ -1,13 +1,16 @@
 package com.element;
 
+import com.contant.CanGoStrategy;
 import com.element.enums.Direct;
 import com.element.enums.MapElementType;
+import com.element.tank.Tank;
 import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 // 可移动元素块的类
 @Data
@@ -16,11 +19,11 @@ public abstract class MoveElement extends ElementOld {
 
     private int oldX;
     private int oldY;
-    // 方向
+    /**
+     * 方向
+     */
     private Direct direct;
     private int speed;
-
-    private EnumMap<MapElementType, Boolean> cango;
     private Boolean going = false;
 
 
@@ -95,7 +98,16 @@ public abstract class MoveElement extends ElementOld {
     }
 
     public boolean isTouchWall() {
-        return Ztream.of(Game.getStage().getMapElements()).anyMatch(e -> (isTouch(e) && !getCango().get(e.getMapType()))) || !isInStage();
+        Map<MapElementType, Boolean> cango;
+        if (this instanceof Tank) {
+            cango = CanGoStrategy.TANK_MAP;
+        } else if (this instanceof Bullet) {
+            cango = CanGoStrategy.BULLET_MAP;
+        } else {
+            cango = CanGoStrategy.BULLET_MAP;
+        }
+        return !isInStage() || Ztream.of(Game.getStage().getMapElements())
+                .anyMatch(e -> (isTouch(e) && !cango.get(e.getMapType())));
     }
 
     public Direct getNextStep(int i, int j) {

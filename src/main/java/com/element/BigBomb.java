@@ -1,8 +1,5 @@
 package com.element;
 
-import com.element.Bomb;
-import com.element.ElementOld;
-import com.game.Game;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;

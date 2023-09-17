@@ -156,14 +156,10 @@ public class Player extends Tank {
                 ACTIVE[i] = false;
             }
         }
-        bulletType = switch (e.getKeyCode()) {
-            case KeyEvent.VK_1 -> 0;
-            case KeyEvent.VK_2 -> 1;
-            case KeyEvent.VK_3 -> 2;
-            case KeyEvent.VK_4 -> 3;
-            case KeyEvent.VK_5 -> 4;
-            default -> bulletType;
-        };
+        var tempType = e.getKeyCode() - 49;
+        if (tempType >= 0 && tempType < 5) {
+            bulletType = tempType;
+        }
     }
 }
 

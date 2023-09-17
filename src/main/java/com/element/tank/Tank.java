@@ -10,7 +10,10 @@ import lombok.NoArgsConstructor;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.List;
 
 // 坦克的类，所有坦克的父类
 @Data
@@ -27,7 +30,7 @@ public class Tank extends MoveElement {
     // 定义新生成时无敌闪烁
     public Flash flash = null;
     boolean bitdead;
-    final boolean[] ACTIVE = {false, false, false, false, false};
+    final boolean[] ACTIVE = new boolean[]{false, false, false, false, false};
 
     long shootLastTime = 0;
     long moveLastTime = 0;
@@ -41,19 +44,8 @@ public class Tank extends MoveElement {
         setWidth(32);
         setHeight(32);
         setSpeed(16);
-        setCango(Tank.GO_MAP);
         this.star = new Star(this);
 
-    }
-
-    public static EnumMap<MapElementType, Boolean> GO_MAP = new EnumMap<>(MapElementType.class);
-
-    static {
-        GO_MAP.put(MapElementType.TREE, true);
-        GO_MAP.put(MapElementType.SNOW, true);
-        GO_MAP.put(MapElementType.BRICK, false);
-        GO_MAP.put(MapElementType.WATER, false);
-        GO_MAP.put(MapElementType.IRON, false);
     }
 
     public void draw(Graphics g, BufferedImage image) {
@@ -69,14 +61,12 @@ public class Tank extends MoveElement {
         draw(g, getImage());
     }
 
-    public void decrBulletNum(){
+    public void decrBulletNum() {
         this.bulletNum--;
     }
 
     void initMove() {
-        for (int i = 0; i < ACTIVE.length - 1; i++) {
-            ACTIVE[i] = false;
-        }
+        Arrays.fill(ACTIVE, false);
     }
 
     // 移动
@@ -111,13 +101,11 @@ public class Tank extends MoveElement {
     }
 
     private void creatLaser() {
-        Bullet bullet = new Laser(this, getDirect());
-        stageAdd(bullet);
+        stageAdd(new Laser(this, getDirect()));
     }
 
     private void creatWave() {
-        Wave wave = new Wave(this);
-        stageAdd(wave);
+        stageAdd(new Wave(this));
     }
 
     // 发射子弹方法

@@ -1,5 +1,6 @@
 package com.element;
 
+import com.contant.CanGoStrategy;
 import com.element.enums.Direct;
 import com.element.tank.Tank;
 import com.game.Game;
@@ -71,7 +72,7 @@ public class Laser extends Bullet {
     private void length() {
         Tank master = getMaster();
         Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
-            if (isTouch(e) && !Bullet.GO_MAP.get(e.getMapType())) {
+            if (isTouch(e) && !CanGoStrategy.BULLET_MAP.get(e.getMapType())) {
                 int eX = e.getX();
                 int eY = e.getY();
                 int eWidth = e.getWidth();

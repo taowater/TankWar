@@ -277,7 +277,7 @@ public class Stage extends Scene {
                 player.flash.life = 64;
                 player.flash.setIsLive(false);
             }
-            case 4 -> Ztream.of(getEnemies()).forEach(e -> e.setIsLive(false));
+            case 4 -> Ztream.of(getEnemies()).forEach(Enemy::death);
             case 5 -> player.setMaxlife(player.getMaxlife() + 1);
             default -> throw new IllegalStateException("Unexpected value: " + reward.id);
         }

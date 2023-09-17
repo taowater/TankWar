@@ -1,6 +1,7 @@
 package com.element;
 
 import com.ai.AStar;
+import com.contant.CanGoStrategy;
 import com.element.enums.Direct;
 import com.element.enums.MapElementType;
 import com.element.map.Brick;
@@ -43,21 +44,9 @@ public class Bullet extends MoveElement {
         this.setHeight(32);
         this.setSpeed(8);
         this.master = master;
-        this.setCango(Bullet.GO_MAP);
         init();
         MusicUtil.play("开始攻击");
     }
-
-    public static EnumMap<MapElementType, Boolean> GO_MAP = new EnumMap<>(MapElementType.class);
-
-    static {
-        GO_MAP.put(MapElementType.TREE, true);
-        GO_MAP.put(MapElementType.SNOW, true);
-        GO_MAP.put(MapElementType.BRICK, false);
-        GO_MAP.put(MapElementType.WATER, true);
-        GO_MAP.put(MapElementType.IRON, false);
-    }
-
 
     public void setCanTurn(boolean flag) {
         this.canTurn = flag;
@@ -77,7 +66,7 @@ public class Bullet extends MoveElement {
 
     @Override
     public void draw(Graphics g) {
-        setImage(ImageUtil.getSubImage16("bullet",getDirect().ordinal() * 16, 0 ));
+        setImage(ImageUtil.getSubImage16("bullet", getDirect().ordinal() * 16, 0));
 
         if (!isTouch(master)) {
             g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());
@@ -93,7 +82,7 @@ public class Bullet extends MoveElement {
         if (canTurn) {
             guaiwan();
         }
-        if(bitFort(Game.stage.fort) || bitTank() ||bitBrick() ||bitBullet()){
+        if (bitFort(Game.stage.fort) || bitTank() || bitBrick() || bitBullet()) {
             death();
         }
         if (reach > 0) {
@@ -175,9 +164,9 @@ public class Bullet extends MoveElement {
         List<MapElement> elements = Game.getStage().getMapElements();
         MapElement[] elements_temp = new MapElement[3];
         int index = 0;
-        int length = elements.size();
+
         for (MapElement element : elements) {
-            if (isTouch(element) && element.getIsLive() && !Bullet.GO_MAP.get(element.getMapType())) {
+            if (isTouch(element) && element.getIsLive() && !CanGoStrategy.BULLET_MAP.getOrDefault(element.getMapType(), true)) {
                 elements_temp[index++] = element;
                 death();
             }
@@ -203,15 +192,15 @@ public class Bullet extends MoveElement {
         boolean flag = false;
         if (getDirect().ordinal() > 3) {
             for (MapElement mapElement : elements) {
-                if (mapElement != null && !Bullet.GO_MAP.get(mapElement.getMapType())) {
+                if (mapElement != null && !CanGoStrategy.BULLET_MAP.get(mapElement.getMapType())) {
                     if (mapElement instanceof Iron) {
                         if (master instanceof Player player && player.getLevel() > 2) {
                             mapElement.setIsLive(false);
-                            flag =  true;
+                            flag = true;
                         }
                     } else {
                         mapElement.setIsLive(false);
-                        flag =  true;
+                        flag = true;
                     }
                 }
             }
