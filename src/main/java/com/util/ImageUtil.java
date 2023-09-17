@@ -8,7 +8,6 @@ import lombok.experimental.UtilityClass;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @UtilityClass
 public class ImageUtil {
 
-    public static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
+    private static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
 
 
     @SneakyThrows

@@ -50,22 +50,25 @@ public class Wave extends Bullet {
         return flag.get();
     }
 
+    public void death() {
+        setIsLive(false);
+        getMaster().decrBulletNum();
+    }
+
     @Override
     public void draw(Graphics g) {
-        setImage(ImageUtil.getSubImage192("wave",getDirect().ordinal() * 192, 0 ));
+        setImage(ImageUtil.getSubImage192("wave", getDirect().ordinal() * 192, 0));
         g.drawImage(getImage(), getX(), getY(), 192, 192, Game.getStage());
-        if (getIsLive()) {
-            if (!Game.pause) {
-                bitTank();
-                if (getReach() > 0) {
-                    setReach(getReach() - 1);
-                } else {
-                    setIsLive(false);
-                }
-            }
-        } else {
-            Game.getStage().getBullets().remove(this);
-            getMaster().decrBulletNum();
+
+        if (Game.pause) {
+            return;
         }
+        bitTank();
+        if (getReach() > 0) {
+            setReach(getReach() - 1);
+        } else {
+            death();
+        }
+
     }
 }

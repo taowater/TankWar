@@ -1,6 +1,5 @@
 package com.element;
 
-import com.game.Game;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 

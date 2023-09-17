@@ -71,16 +71,16 @@ public class Laser extends Bullet {
 
     private void length() {
         Tank master = getMaster();
+        int masterX = master.getX();
+        int masterY = master.getY();
+        int masterWidth = master.getWidth();
+        int masterHeight = master.getHeight();
         Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
             if (isTouch(e) && !CanGoStrategy.BULLET_MAP.get(e.getMapType())) {
                 int eX = e.getX();
                 int eY = e.getY();
                 int eWidth = e.getWidth();
                 int eHeight = e.getHeight();
-                int masterX = master.getX();
-                int masterY = master.getY();
-                int masterWidth = master.getWidth();
-                int masterHeight = master.getHeight();
                 switch (getDirect()) {
                     case UP -> {
                         eHeight = masterY - (eY + eHeight);
