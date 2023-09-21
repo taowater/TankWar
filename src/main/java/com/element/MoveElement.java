@@ -8,13 +8,14 @@ import com.game.Game;
 import com.history.core.util.stream.Ztream;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
-import java.util.EnumMap;
 import java.util.Map;
 
 // 可移动元素块的类
 @Data
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
 public abstract class MoveElement extends ElementOld {
 
     private int oldX;
