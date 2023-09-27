@@ -14,7 +14,12 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
-//玩家操作坦克的类
+/**
+ * 玩家操作坦克的类
+ *
+ * @author zhu56
+ * @date 2023/09/28 00:36
+ */
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Player extends Tank {

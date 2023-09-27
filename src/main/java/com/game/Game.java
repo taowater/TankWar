@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
+import static java.lang.StringTemplate.STR;
+
 @UtilityClass
 public class Game {
 
@@ -151,8 +153,8 @@ public class Game {
         int length = 0;
         int length2 = 0;
         StringBuilder string = new StringBuilder();
-        String str = "";
-        String name = MessageFormat.format("map/map{0}.txt", stage);
+        String str;
+        String name = STR. "map/map\{ stage }.txt" ;
 
         String path = getPath(name);
         try (BufferedReader bf = new BufferedReader(new FileReader(path))) {

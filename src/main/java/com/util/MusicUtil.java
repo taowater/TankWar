@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 public class MusicUtil {
 
     public static void play(String string) {
-        Thread.startVirtualThread(new Music("music/" + string + ".wav"));
+        Thread.startVirtualThread(new Music(STR."music/\{string}.wav"));
     }
 
     public static void start() {

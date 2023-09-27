@@ -29,7 +29,7 @@ public class ImageUtil {
     }
 
     public static BufferedImage getMaterial(String path) {
-        return IMAGE_CACHE.computeIfAbsent("image/" + path + ".png", ImageUtil::doGetMaterial);
+        return IMAGE_CACHE.computeIfAbsent(STR. "image/\{ path }.png" , ImageUtil::doGetMaterial);
     }
 
     public static BufferedImage getMaterial() {
