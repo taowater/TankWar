@@ -43,7 +43,7 @@ public class Element implements Draw, HadRect {
     }
 
 
-    public boolean isInStage() {
+    public final boolean isInStage() {
         return x >= 0 && x <= Game.stage.getWidth() - width && y >= 0 && y <= Game.stage.getHeight() - height;
     }
 

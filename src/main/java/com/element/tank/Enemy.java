@@ -35,7 +35,6 @@ public class Enemy extends Tank {
 
     public Enemy(int x, int y, int type, Direct direct) {
         super(x, y, direct);
-        this.isEnemy = true;
         this.type = type;
         this.maxbuttle = 1;
         this.withReward = false;

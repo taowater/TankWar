@@ -19,8 +19,6 @@ import java.util.List;
 @Data
 public class Tank extends MoveElement {
 
-    public boolean isPlayer;
-    public boolean isEnemy;
     public int bulletType = 0;
     int bulletNum;
     // 最大子弹数

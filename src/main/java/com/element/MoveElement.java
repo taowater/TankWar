@@ -36,14 +36,10 @@ public abstract class MoveElement extends Element {
     // 移动
     public void move() {
         switch (this.direct) {
-            case UP ->// 上
-                    decrY(speed);
-            case RIGHT ->// 右
-                    incrX(speed);
-            case DOWN ->// 下
-                    incrY(speed);
-            case LEFT ->// 左
-                    decrX(speed);
+            case UP -> decrY(speed);
+            case RIGHT -> incrX(speed);
+            case DOWN -> incrY(speed);
+            case LEFT -> decrX(speed);
             default -> throw new IllegalStateException("Unexpected value: " + this.direct);
         }
     }

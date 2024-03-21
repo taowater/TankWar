@@ -31,7 +31,6 @@ public class Player extends Tank {
 
     public Player(int x, int y, Direct direct) {
         super(x, y, direct);
-        this.isPlayer = true;
         this.setSpeed(4);
         this.newDirect = direct;
         this.maxbuttle = 1;
