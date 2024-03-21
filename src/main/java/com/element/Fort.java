@@ -5,7 +5,7 @@ import com.util.ImageUtil;
 
 import java.awt.*;
 
-public class Fort extends ElementOld {
+public class Fort extends Element {
     public Fort(int x, int y) {
         super(x, y);
         setImage(ImageUtil.getSubImage32("material", 0, 3 * 32));

@@ -16,7 +16,7 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
-public abstract class MoveElement extends ElementOld {
+public abstract class MoveElement extends Element {
 
     private int oldX;
     private int oldY;

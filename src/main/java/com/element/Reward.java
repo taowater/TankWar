@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * @author Zhu_wuliu
  */
-public class Reward extends ElementOld {
+public class Reward extends Element {
     public final int id;
     private int time;
     private boolean isDraw;

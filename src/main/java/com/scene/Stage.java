@@ -1,7 +1,7 @@
 package com.scene;
 
 import com.element.Bullet;
-import com.element.ElementOld;
+import com.element.Element;
 import com.element.Fort;
 import com.element.Reward;
 import com.element.enums.Direct;
@@ -45,7 +45,7 @@ public class Stage extends Scene {
     private long lastCreatEnemyTime = 0;
     public transient Fort fort;
 
-    private final List<ElementOld> elements = new ArrayList<>();
+    private final List<Element> elements = new ArrayList<>();
 
     private int overY = 32 * 13;
 
@@ -58,14 +58,14 @@ public class Stage extends Scene {
         init();
     }
 
-    public void addElement(ElementOld e) {
+    public void addElement(Element e) {
         if (EmptyUtil.isEmpty(e)) {
             return;
         }
         this.elements.add(e);
     }
 
-    public void removeElement(ElementOld e) {
+    public void removeElement(Element e) {
         this.elements.remove(e);
     }
 
@@ -154,7 +154,7 @@ public class Stage extends Scene {
         return Ztream.of(getPlayers()).any().orElse(null);
     }
 
-    private <E extends ElementOld> List<E> getElements(Class<E> clazz) {
+    private <E extends Element> List<E> getElements(Class<E> clazz) {
         return Ztream.of(elements).filter(e -> clazz.isAssignableFrom(e.getClass())).cast(clazz).toList();
     }
 
@@ -245,7 +245,7 @@ public class Stage extends Scene {
     }
 
     public void dispose() {
-        Ztream.of(getTanks()).cast(ElementOld.class).append(getBullets()).forEach(e -> e.setIsLive(false));
+        Ztream.of(getTanks()).cast(Element.class).append(getBullets()).forEach(e -> e.setIsLive(false));
     }
 
     public void creatReward() {

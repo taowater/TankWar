@@ -2,7 +2,7 @@ package com.element.tank;
 
 import com.ai.AStar;
 import com.element.BigBomb;
-import com.element.ElementOld;
+import com.element.Element;
 import com.element.Fort;
 import com.element.enums.Direct;
 import com.game.Game;
@@ -121,8 +121,8 @@ public class Enemy extends Tank {
      * @param element 目标
      * @return boolean
      */
-    private boolean canBit(ElementOld element) {
-        if (!Any.of(element).get(ElementOld::getIsLive, false)) {
+    private boolean canBit(Element element) {
+        if (!Any.of(element).get(Element::getIsLive, false)) {
             return false;
         }
         int x = getX();

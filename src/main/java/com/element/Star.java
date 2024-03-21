@@ -1,7 +1,6 @@
 package com.element;
 
 import com.element.tank.Tank;
-import com.game.Game;
 import com.util.ImageUtil;
 
 import java.awt.*;
@@ -9,7 +8,7 @@ import java.awt.*;
 /**
  * @author Zhu_wuliu
  */ // 坦克出现时闪光的类
-public class Star extends ElementOld {
+public class Star extends Element {
 
     public Star(Tank tank) {
         super(tank.getX(), tank.getY());

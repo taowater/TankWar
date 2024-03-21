@@ -1,6 +1,6 @@
 package com.element.map;
 
-import com.element.ElementOld;
+import com.element.Element;
 import com.element.enums.MapElementType;
 import com.util.ImageUtil;
 import lombok.Data;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class MapElement extends ElementOld {
+public class MapElement extends Element {
 
     private MapElementType mapType;
 

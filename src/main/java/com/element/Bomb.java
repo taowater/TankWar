@@ -6,7 +6,7 @@ import com.util.MusicUtil;
 
 import java.awt.*;
 
-public class Bomb extends ElementOld {
+public class Bomb extends Element {
 
     public Bomb(int x, int y) {
         super(x, y);

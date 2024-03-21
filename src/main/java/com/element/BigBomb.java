@@ -14,10 +14,6 @@ public class BigBomb extends Bomb {
         MusicUtil.play("爆炸");
     }
 
-    public boolean isTouch(ElementOld material) {
-        return getRect().intersects(material.getRect()) && material.getIsLive();
-    }
-
     @Override
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage32("material", 64 + (4 - getLife()) * 32, 32));

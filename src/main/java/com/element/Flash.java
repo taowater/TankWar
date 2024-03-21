@@ -6,7 +6,7 @@ import com.util.ImageUtil;
 
 import java.awt.*;
 
-public class Flash extends ElementOld {
+public class Flash extends Element {
 
     private final Player master;
     public int life;
