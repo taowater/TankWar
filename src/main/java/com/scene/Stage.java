@@ -8,6 +8,7 @@ import com.element.enums.Direct;
 import com.element.inter.Draw;
 import com.element.map.Iron;
 import com.element.map.MapElement;
+import com.element.map.Tree;
 import com.element.tank.Enemy;
 import com.element.tank.Player;
 import com.element.tank.Tank;
@@ -29,7 +30,7 @@ import static com.game.Game.*;
 
 public class Stage extends Scene {
 
-    @NoArgsConstructor(access= AccessLevel.PRIVATE)
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static class CountData {
         public static final int[] LEVEL = {0, 0, 0, 0};
         public static final int[] LEVEL_2 = {0, 0, 0, 0};
@@ -70,7 +71,7 @@ public class Stage extends Scene {
     }
 
     private void drawElements(Graphics g) {
-        Ztream.of(elements).cast(Draw.class).append(fort).forEach(e -> e.draw(g));
+        Ztream.of(elements).asc(e -> e.getClass().isAssignableFrom(Tree.class) ? 1 : 0).cast(Draw.class).append(fort).forEach(e -> e.draw(g));
     }
 
     private void removeDeath() {
@@ -98,7 +99,7 @@ public class Stage extends Scene {
 
         removeDeath();
         drawElements(g);
-        if(fogFlag){
+        if (fogFlag) {
             Ztream.of(getPlayers()).forEach(e -> drawFog(e, g));
         }
 
@@ -195,7 +196,7 @@ public class Stage extends Scene {
             for (int j = 0; j < fog[0].length; j++) {
                 int a = Math.abs(player.getX() + 8 - j * 16);
                 int b = Math.abs(player.getY() + 8 - i * 16);
-                var sqrt = Math.sqrt((double)(a * a) + (b * b));
+                var sqrt = Math.sqrt((double) (a * a) + (b * b));
                 if (sqrt >= 32 * 4 && fog[i][j] <= 96) {
                     ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) ((96 - fog[i][j]) / 96.0));
                     g2d.setComposite(ac);
