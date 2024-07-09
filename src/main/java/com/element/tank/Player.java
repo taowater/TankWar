@@ -4,11 +4,12 @@ import com.element.Flash;
 import com.element.enums.Direct;
 import com.element.enums.MapElementType;
 import com.game.Game;
-import com.history.core.util.stream.Ztream;
+import com.taowater.ztream.Ztream;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -21,6 +22,7 @@ import java.awt.image.BufferedImage;
  * @date 2023/09/28 00:36
  */
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class Player extends Tank {
     private int score = 0;
@@ -41,13 +43,13 @@ public class Player extends Tank {
     }
 
     public void setImage(int i) {
-        setImage(ImageUtil.getMaterial("player" + i));
+        setImageName("player" + i);
     }
 
     // 描绘
     @Override
     public void draw(Graphics g) {
-        BufferedImage tank = getImage().getSubimage((level - 1) * 56, 28 * getDirect().ordinal(), 28, 28);
+        BufferedImage tank = ImageUtil.getMaterial(getImageName()).getSubimage((level - 1) * 56, 28 * getDirect().ordinal(), 28, 28);
         if (star.getIsLive()) {
             star.draw(g);
         } else if (getIsLive()) {

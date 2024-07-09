@@ -1,26 +1,23 @@
 package com.element;
 
 import com.ai.AStar;
-import com.contant.CanGoStrategy;
 import com.element.enums.Direct;
-import com.element.enums.MapElementType;
 import com.element.map.Brick;
 import com.element.map.Iron;
 import com.element.map.MapElement;
 import com.element.tank.Enemy;
 import com.element.tank.Player;
 import com.element.tank.Tank;
-import com.game.*;
-import com.history.core.util.EmptyUtil;
-import com.history.core.util.stream.Ztream;
+import com.game.Game;
 import com.scene.Stage;
+import com.taowater.taol.core.util.EmptyUtil;
+import com.taowater.ztream.Ztream;
 import com.util.ImageUtil;
 import com.util.MusicUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,14 +25,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Bullet extends MoveElement {
-    private Tank master;
+    static int[] list = null;
     boolean canTurn;
-
+    private Tank master;
     /**
      * 射程
      */
     private int reach = 18 * 3;
-    static int[] list = null;
 
     // 子弹构造函数，要求初始化坐标及方向
     public Bullet(Tank master) {
@@ -166,7 +162,7 @@ public class Bullet extends MoveElement {
         int index = 0;
 
         for (MapElement element : elements) {
-            if (isTouch(element) && element.getIsLive() && !CanGoStrategy.BULLET_MAP.getOrDefault(element.getMapType(), true)) {
+            if (isTouch(element) && element.getIsLive() && !element.getMapType().isBulletGo()) {
                 elements_temp[index++] = element;
                 death();
             }
@@ -192,7 +188,7 @@ public class Bullet extends MoveElement {
         boolean flag = false;
         if (getDirect().ordinal() > 3) {
             for (MapElement mapElement : elements) {
-                if (mapElement != null && !CanGoStrategy.BULLET_MAP.get(mapElement.getMapType())) {
+                if (mapElement != null && !mapElement.getMapType().isBulletGo()) {
                     if (mapElement instanceof Iron) {
                         if (master instanceof Player player && player.getLevel() > 2) {
                             mapElement.setIsLive(false);

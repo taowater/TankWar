@@ -3,7 +3,7 @@ package com.scene;
 import com.element.map.Brick;
 import com.game.Game;
 import com.game.TankWar;
-import com.history.core.util.stream.Ztream;
+import com.taowater.ztream.Ztream;
 import com.util.ImageUtil;
 
 import java.awt.*;
@@ -18,19 +18,18 @@ import java.util.List;
  */
 public class Title extends Scene {
 
-    public boolean open = false;
     private final int MENU_INDEX = 256;
-    private String[] menu;
-    private BufferedImage indexItem = null;
+    public boolean open = false;
     public int index = 0;
-    private boolean flag = false;
-    private boolean pressFlag = true;
+    public List<Brick> logo2;
+    public List<Brick> logoRemove = new ArrayList<>();
     long startTime = 0;
     TankWar tankWar;
     List<Brick> logo;
-    public List<Brick> logo2;
-    public List<Brick> logoRemove = new ArrayList<>();
-
+    private String[] menu;
+    private BufferedImage indexItem = null;
+    private boolean flag = false;
+    private boolean pressFlag = true;
     private BufferedImage tankImage;
 
     public Title(TankWar tankWar) {

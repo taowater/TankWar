@@ -2,34 +2,30 @@ package com.element.tank;
 
 import com.element.*;
 import com.element.enums.Direct;
-import com.element.enums.MapElementType;
 import com.game.Game;
-import com.history.core.util.stream.Ztream;
+import com.taowater.ztream.Ztream;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.List;
 
 // 坦克的类，所有坦克的父类
 @Data
+@NoArgsConstructor
 public class Tank extends MoveElement {
 
+    final boolean[] ACTIVE = new boolean[]{false, false, false, false, false};
     public int bulletType = 0;
+    // 定义新生成时无敌闪烁
+    public Flash flash = null;
     int bulletNum;
     // 最大子弹数
     int maxbuttle;
     // 定义新生成时闪光
     Star star;
-    // 定义新生成时无敌闪烁
-    public Flash flash = null;
     boolean bitdead;
-    final boolean[] ACTIVE = new boolean[]{false, false, false, false, false};
-
     long shootLastTime = 0;
     long moveLastTime = 0;
 
@@ -70,7 +66,6 @@ public class Tank extends MoveElement {
     // 移动
     @Override
     public void move() {
-        // Game.PlaySound("移动");
         super.move();
     }
 

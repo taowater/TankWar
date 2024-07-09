@@ -1,7 +1,7 @@
 package com.util;
 
 import com.game.Game;
-import com.history.core.util.EmptyUtil;
+import com.taowater.taol.core.util.EmptyUtil;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
@@ -29,7 +29,7 @@ public class ImageUtil {
     }
 
     public static BufferedImage getMaterial(String path) {
-        return IMAGE_CACHE.computeIfAbsent(STR. "image/\{ path }.png" , ImageUtil::doGetMaterial);
+        return IMAGE_CACHE.computeIfAbsent(STR."image/\{path}.png", ImageUtil::doGetMaterial);
     }
 
     public static BufferedImage getMaterial() {

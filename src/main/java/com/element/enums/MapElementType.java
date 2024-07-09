@@ -10,24 +10,26 @@ public enum MapElementType {
     /**
      * 树
      */
-    TREE,
+    TREE(true, true),
     /**
      *
      */
-    SNOW,
+    SNOW(true, true),
     /**
      * 砖
      */
-    BRICK,
+    BRICK(false, false),
     /**
      * 水
      */
-    WATER,
+    WATER(false, true),
     /**
      * 铁
      */
-    IRON,
+    IRON(false, false),
+    ;
 
-//    private final String  image;
+    private final boolean tankGo;
+    private final boolean bulletGo;
 
 }

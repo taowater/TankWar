@@ -2,12 +2,12 @@ package com.ai;
 
 import com.element.enums.Direct;
 import com.game.Game;
-import com.history.core.util.Any;
-import com.history.core.util.EmptyUtil;
+import com.taowater.taol.core.util.EmptyUtil;
+import com.taowater.ztream.Any;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.awt.Point;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,11 +20,11 @@ public class AStar {
     private final Node[][] map;
     // 节点数组
     private final Node startNode;
-    // 起点
-    private Node endNode;
     // 使用ArrayList数组作为“开启列表”和“关闭列表”
     private final List<Node> open = new ArrayList<>();
     private final List<Node> close = new ArrayList<>();
+    // 起点
+    private Node endNode;
 
     public AStar(int[][] currenMap, int x1, int y1, int x2, int y2) {
 

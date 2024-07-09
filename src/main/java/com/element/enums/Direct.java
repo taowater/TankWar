@@ -1,9 +1,8 @@
 package com.element.enums;
 
-import cn.hutool.core.util.EnumUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.google.common.base.Enums;
 import com.util.RangeUtil;
+import org.dromara.hutool.core.util.EnumUtil;
 
 public enum Direct {
 

@@ -1,8 +1,8 @@
 package com.game;
 
 import com.element.map.*;
-import com.history.core.util.Any;
 import com.scene.Stage;
+import com.taowater.ztream.Any;
 import com.util.ImageUtil;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
@@ -15,20 +15,26 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 
-import static java.lang.StringTemplate.STR;
-
 @UtilityClass
 public class Game {
 
     public static final Map<Integer, int[][]> MAP_CACHE = new ConcurrentHashMap<>(0);
-
+    public static final int[][] PlayerDIRECT = {{KeyEvent.VK_W, KeyEvent.VK_D, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_H},
+            {KeyEvent.VK_UP, KeyEvent.VK_RIGHT, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_NUMPAD0},};
+    public static final boolean[] tankcango = {true, true, true, false, false, false};
+    public static final List<BiFunction<Integer, Integer, MapElement>> mapBuilder = List.of(
+            Tree::new,
+            Snow::new,
+            Brick::new,
+            Water::new,
+            Iron::new
+    );
     public static boolean fogFlag = false;
     public static boolean pause = false;
     public static int stagesth = 1;
@@ -40,10 +46,7 @@ public class Game {
     public static boolean fail = false;
     public static String[] title_menu = {"NEW GAME", "CONSTRUCTION"};
     public static String[] title_menu2 = {"1 PLAYER", "2 PLAYERS"};
-    public static final int[][] PlayerDIRECT = {{KeyEvent.VK_W, KeyEvent.VK_D, KeyEvent.VK_S, KeyEvent.VK_A, KeyEvent.VK_H},
-            {KeyEvent.VK_UP, KeyEvent.VK_RIGHT, KeyEvent.VK_DOWN, KeyEvent.VK_LEFT, KeyEvent.VK_NUMPAD0},};
     public static boolean[] bulletcango = {true, true, true, false, true, false};
-    public static final boolean[] tankcango = {true, true, true, false, false, false};
 
     public static int Reduce(int n, int left, int right, int step) {
         int i = n;
@@ -125,14 +128,6 @@ public class Game {
         return logo;
     }
 
-    public static final List<BiFunction<Integer, Integer, MapElement>> mapBuilder = List.of(
-            Tree::new,
-            Snow::new,
-            Brick::new,
-            Water::new,
-            Iron::new
-    );
-
     public static MapElement creatMapElement(int type, int x, int y) {
         return Any.of(mapBuilder.get(type)).get(f -> f.apply(x, y));
     }
@@ -154,7 +149,7 @@ public class Game {
         int length2 = 0;
         StringBuilder string = new StringBuilder();
         String str;
-        String name = STR. "map/map\{ stage }.txt" ;
+        String name = STR."map/map\{stage}.txt";
 
         String path = getPath(name);
         try (BufferedReader bf = new BufferedReader(new FileReader(path))) {

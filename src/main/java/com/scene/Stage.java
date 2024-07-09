@@ -14,8 +14,8 @@ import com.element.tank.Player;
 import com.element.tank.Tank;
 import com.game.Game;
 import com.game.TankWar;
-import com.history.core.util.EmptyUtil;
-import com.history.core.util.stream.Ztream;
+import com.taowater.taol.core.util.EmptyUtil;
+import com.taowater.ztream.Ztream;
 import com.util.MusicUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -30,28 +30,18 @@ import static com.game.Game.*;
 
 public class Stage extends Scene {
 
-    @NoArgsConstructor(access = AccessLevel.PRIVATE)
-    public static class CountData {
-        public static final int[] LEVEL = {0, 0, 0, 0};
-        public static final int[] LEVEL_2 = {0, 0, 0, 0};
-    }
-
-    private int width;
-    private int height;
+    private final List<Element> elements = new ArrayList<>();
     public int pausetime = 0;
-    private int waittime = 64;
-
     // 敌方坦克数量
     public int enumber = 6;
-    private long lastCreatEnemyTime = 0;
     public transient Fort fort;
-
-    private final List<Element> elements = new ArrayList<>();
-
-    private int overY = 32 * 13;
-
     public boolean over = false;
     public boolean isLive;
+    private int width;
+    private int height;
+    private int waittime = 64;
+    private long lastCreatEnemyTime = 0;
+    private int overY = 32 * 13;
     private int[][] fog;
 
     public Stage() {
@@ -102,9 +92,7 @@ public class Stage extends Scene {
         if (fogFlag) {
             Ztream.of(getPlayers()).forEach(e -> drawFog(e, g));
         }
-
         drawGame(g);
-
     }
 
     private void init() {
@@ -325,6 +313,7 @@ public class Stage extends Scene {
         while (true) {
             repaint();
             Game.Sleep(30);
+            System.out.println("---");
             creatEnemy();
             if (!fort.getIsLive() || EmptyUtil.isEmpty(getPlayers())) {
                 Game.fail = true;
@@ -352,5 +341,11 @@ public class Stage extends Scene {
                 break;
             }
         }
+    }
+
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class CountData {
+        public static final int[] LEVEL = {0, 0, 0, 0};
+        public static final int[] LEVEL_2 = {0, 0, 0, 0};
     }
 }

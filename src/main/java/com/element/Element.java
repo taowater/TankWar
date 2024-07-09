@@ -3,7 +3,6 @@ package com.element;
 import com.element.inter.Draw;
 import com.element.inter.HadRect;
 import com.game.Game;
-import com.history.core.util.Any;
 import com.scene.Scene;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,6 +32,7 @@ public class Element implements Draw, HadRect {
     private int life;
     // 图片
     private BufferedImage image;
+    private String imageName;
     // 定义是否存活的布尔变量
     private Boolean isLive;
 
