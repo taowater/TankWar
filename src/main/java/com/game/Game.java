@@ -1,5 +1,6 @@
 package com.game;
 
+import com.element.enums.Direct;
 import com.element.map.*;
 import com.scene.Stage;
 import com.taowater.ztream.Any;
@@ -49,41 +50,36 @@ public class Game {
     public static boolean[] bulletcango = {true, true, true, false, true, false};
 
     public static int Reduce(int n, int left, int right, int step) {
-        int i = n;
-        if (i > left) {
-            return i - step;
+        if (n > left) {
+            return n - step;
         } else {
             return right;
         }
     }
 
-    //判断A点在B点的上下左右包括斜方向8个方位哪个位置，返回0到7
     public static int getAinBdirection(Point a, Point b) {
-        if (a.x == b.x && a.y < b.y) {
-            return 0;
+        if (a.x < b.x) {
+            if (a.y < b.y) {
+                return Direct.LEFT_UP.ordinal();
+            }
+            if (a.y == b.y) {
+                return Direct.LEFT.ordinal();
+            }
+            return Direct.LEFT_DOWN.ordinal();
         }
-        if (a.x > b.x && a.y == b.y) {
-            return 1;
+        if (a.x > b.x) {
+            if (a.y < b.y) {
+                return Direct.RIGHT_UP.ordinal();
+            }
+            if (a.y == b.y) {
+                return Direct.RIGHT.ordinal();
+            }
+            return Direct.RIGHT_DOWN.ordinal();
         }
-        if (a.x == b.x && a.y > b.y) {
-            return 2;
+        if (a.y > b.y) {
+            return Direct.DOWN.ordinal();
         }
-        if (a.x < b.x && a.y == b.y) {
-            return 3;
-        }
-        if (a.x < b.x && a.y < b.y) {
-            return 4;
-        }
-        if (a.x > b.x && a.y < b.y) {
-            return 5;
-        }
-        if (a.x > b.x && a.y > b.y) {
-            return 6;
-        }
-        if (a.x < b.x && a.y > b.y) {
-            return 7;
-        }
-        return 0;
+        return Direct.UP.ordinal();
     }
 
     public static int rand(int n) {
