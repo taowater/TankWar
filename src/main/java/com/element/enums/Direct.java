@@ -1,6 +1,5 @@
 package com.element.enums;
 
-import com.google.common.base.Enums;
 import com.util.RangeUtil;
 import org.dromara.hutool.core.util.EnumUtil;
 

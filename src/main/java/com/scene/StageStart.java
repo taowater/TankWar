@@ -10,6 +10,7 @@ public class StageStart extends Scene {
     private int starttime = 8;
 
     public StageStart() {
+        super(50);
         setBounds(0, 0, TankWar.WIDTH, TankWar.HEIGHT);
     }
 
@@ -34,13 +35,9 @@ public class StageStart extends Scene {
         }
     }
 
-    public void run() {
-        while (true) {
-            Game.Sleep(50);
-            if (starttime > 0) {
-                starttime--;
-            }
-            this.repaint();
+    protected void updateScene() {
+        if (starttime > 0) {
+            starttime--;
         }
     }
 

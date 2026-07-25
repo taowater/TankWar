@@ -63,11 +63,16 @@ public class Element implements Draw, HadRect {
         g.drawImage(image, x, y, width, height, scene);
     }
 
+    /** Advances game state by one fixed timer tick. Rendering must not mutate state. */
+    public void update() {
+    }
+
     // 属性值自键
     void downLife() {
         if (life > 0) {
             life--;
-        } else {
+        }
+        if (life <= 0) {
             isLive = false;
         }
     }

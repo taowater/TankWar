@@ -33,9 +33,17 @@ public class Brick extends MapElement {
                     flag_temp = true;
                 }
             }
-            if (!flag_temp) {
-                setIsLive(false);
-            }
+        }
+    }
+
+    @Override
+    public void update() {
+        boolean hasPart = false;
+        for (boolean part : flag) {
+            hasPart |= part;
+        }
+        if (!hasPart) {
+            setIsLive(false);
         }
     }
 }

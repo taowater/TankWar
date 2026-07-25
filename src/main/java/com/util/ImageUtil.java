@@ -2,12 +2,11 @@ package com.util;
 
 import com.game.Game;
 import com.taowater.taol.core.util.EmptyUtil;
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,13 +22,20 @@ public class ImageUtil {
     private static final Map<String, BufferedImage> IMAGE_CACHE = new ConcurrentHashMap<>(0);
 
 
-    @SneakyThrows
-    private static BufferedImage doGetMaterial(String realPath) {
-        return ImageIO.read(new File(Game.getPath(realPath)));
+    private static BufferedImage doGetMaterial(String resourcePath) {
+        try (var stream = Game.getResource(resourcePath)) {
+            BufferedImage image = ImageIO.read(stream);
+            if (image == null) {
+                throw new IllegalArgumentException("Unsupported image resource: " + resourcePath);
+            }
+            return image;
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot load image resource: " + resourcePath, e);
+        }
     }
 
     public static BufferedImage getMaterial(String path) {
-        return IMAGE_CACHE.computeIfAbsent(STR."image/\{path}.png", ImageUtil::doGetMaterial);
+        return IMAGE_CACHE.computeIfAbsent("image/" + path + ".png", ImageUtil::doGetMaterial);
     }
 
     public static BufferedImage getMaterial() {

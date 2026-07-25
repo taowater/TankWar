@@ -1,232 +1,138 @@
 package com.ai;
 
-import com.element.enums.Direct;
-import com.game.Game;
-import com.taowater.taol.core.util.EmptyUtil;
-import com.taowater.ztream.Any;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.awt.*;
+import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
 
-/**
- * @author Zhu_wuliu
- */
+/** A deterministic four-direction A* path finder for the tile map. */
 public class AStar {
 
-    private final Node[][] map;
-    // 节点数组
-    private final Node startNode;
-    // 使用ArrayList数组作为“开启列表”和“关闭列表”
-    private final List<Node> open = new ArrayList<>();
-    private final List<Node> close = new ArrayList<>();
-    // 起点
-    private Node endNode;
+    private static final int[][] DIRECTIONS = {{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
 
-    public AStar(int[][] currenMap, int x1, int y1, int x2, int y2) {
+    private final int[][] map;
+    private final int startRow;
+    private final int startColumn;
+    private final int targetRow;
+    private final int targetColumn;
 
-        map = new Node[currenMap.length][currenMap[0].length];
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                map[i][j] = new Node(i, j, currenMap[i][j] == 0);
-            }
+    public AStar(int[][] map, int startRow, int startColumn, int targetRow, int targetColumn) {
+        if (map == null || map.length == 0 || map[0].length == 0) {
+            throw new IllegalArgumentException("Map must not be empty");
         }
-        startNode = map[x1][y1];
-        endNode = map[x2][y2];
+        this.map = map;
+        this.startRow = startRow;
+        this.startColumn = startColumn;
+        this.targetRow = targetRow;
+        this.targetColumn = targetColumn;
     }
 
-    // 获取H值 currentNode：当前节点 endNode：终点
-    private int getH(Node currentNode, Node endNode) {
-        return (Math.abs(currentNode.getX() - endNode.getX()) + Math.abs(currentNode.getY() - endNode.getY()));
-    }
-
-    // 获取G值 currentNode：当前节点 return
-    private int getG(Node currentNode) {
-        Node fatherNode = currentNode.getFatherNode();
-        if (fatherNode != null && (currentNode.getX() == fatherNode.getX() || currentNode.getY() == fatherNode.getY())) {
-            // 判断当前节点与其父节点之间的位置关系（水平？对角线）
-            return currentNode.getG() + 1;
-        }
-        return currentNode.getG();
-    }
-
-    // 获取F值 ： G + H currentNode return
-    private int getF(Node currentNode) {
-        return currentNode.getG() + currentNode.getH();
-    }
-
-    // 将选中节点周围的节点添加进“开启列表” node
-    private void inOpen(Node node) {
-
-        int x = node.getX();
-        int y = node.getY();
-        int endX = endNode.getX();
-        int endY = endNode.getY();
-        int[] directList = {0, 1, 2, 3};
-        int direct = Game.getAinBdirection(new Point(y, x), new Point(endY, endX));
-
-        int xValue = Math.abs(endY - y);
-        int yValue = Math.abs(endX - x);
-        if (direct == 4) {
-            if (xValue > yValue) {
-                directList = new int[]{1, 2, 0, 3};
-            } else {
-                directList = new int[]{2, 1, 3, 0};
-            }
-        } else if (direct == 5) {
-            if (xValue > yValue) {
-                directList = new int[]{3, 2, 0, 1};
-            } else {
-                directList = new int[]{2, 3, 1, 0};
-            }
-        } else if (direct == 6) {
-            if (xValue > yValue) {
-                directList = new int[]{3, 0, 2, 1};
-            } else {
-                directList = new int[]{0, 3, 1, 2};
-            }
-        } else if (direct == 7) {
-            if (xValue > yValue) {
-                directList = new int[]{1, 0, 2, 3};
-            } else {
-                directList = new int[]{0, 1, 3, 2};
-            }
-        }
-        for (int i = 0; i < 4; i++) {
-            Node node2 = getDirectNode(node, Direct.get(directList[i]));
-            if (node2 != null && (node2.getCango() && !open.contains(node2))) {
-                node2.setFatherNode(map[x][y]);
-                // 将选中节点作为父节点
-                node2.setG(getG(node2));
-                node2.setH(getH(node2, endNode));
-                node2.setF(getF(node2));
-                open.add(node2);
-            }
-        }
-    }
-
-    // 将节点添加进“关闭列表”
-    private void inClose(Node node, List<Node> open) {
-        if (open.contains(node)) {
-            node.setCango(false);
-            // 设置为不可达
-            open.remove(node);
-            close.add(node);
-        }
-    }
-
+    /**
+     * Returns the path in reverse order (target to the tile next to the start),
+     * preserving the contract used by the tank movement code.
+     */
     public List<Point> search() {
-        // 对起点即起点周围的节点进行操作
-        if (endNode == null || !endNode.getCango()) {
-            for (int i = 0; i < 8; i++) {
-                Node newEnd = getDirectNode(endNode, Direct.get(i));
-                if (newEnd == null || !newEnd.getCango()) {
+        if (!inBounds(startRow, startColumn) || !inBounds(targetRow, targetColumn)) {
+            return List.of();
+        }
+        Point destination = findReachableDestination();
+        if (destination == null || destination.x == startRow && destination.y == startColumn) {
+            return List.of();
+        }
+
+        int rows = map.length;
+        int columns = map[0].length;
+        int[][] distance = new int[rows][columns];
+        for (int[] row : distance) {
+            Arrays.fill(row, Integer.MAX_VALUE);
+        }
+        boolean[][] closed = new boolean[rows][columns];
+        PriorityQueue<Node> open = new PriorityQueue<>(Comparator
+                .comparingInt(Node::estimatedTotal)
+                .thenComparingInt(Node::heuristic));
+
+        Node start = new Node(startRow, startColumn, 0,
+                heuristic(startRow, startColumn, destination), null);
+        distance[startRow][startColumn] = 0;
+        open.add(start);
+
+        while (!open.isEmpty()) {
+            Node current = open.poll();
+            if (closed[current.row][current.column]) {
+                continue;
+            }
+            if (current.row == destination.x && current.column == destination.y) {
+                return buildReversePath(current);
+            }
+            closed[current.row][current.column] = true;
+
+            for (int[] direction : DIRECTIONS) {
+                int nextRow = current.row + direction[0];
+                int nextColumn = current.column + direction[1];
+                if (!isWalkable(nextRow, nextColumn) || closed[nextRow][nextColumn]) {
                     continue;
                 }
-                endNode = newEnd;
-                return search();
+                int nextDistance = current.distance + 1;
+                if (nextDistance >= distance[nextRow][nextColumn]) {
+                    continue;
+                }
+                Node next = new Node(nextRow, nextColumn, nextDistance,
+                        heuristic(nextRow, nextColumn, destination), current);
+                distance[nextRow][nextColumn] = nextDistance;
+                open.add(next);
             }
         }
-        var startX = startNode.getX();
-        var startY = startNode.getY();
-        inOpen(startNode);
-        close.add(startNode);
-        startNode.setCango(false);
-        startNode.setFatherNode(startNode);
-        Any.of(open).ifPresent(l -> l.sort(Comparator.comparing(Node::getF)));
-        // 重复步骤
-        do {
-            if (EmptyUtil.isNotEmpty(open)) {
-                inOpen(open.get(0));
-                inClose(open.get(0), open);
+        return List.of();
+    }
+
+    private Point findReachableDestination() {
+        if (isWalkable(targetRow, targetColumn)) {
+            return new Point(targetRow, targetColumn);
+        }
+        Point best = null;
+        int bestDistance = Integer.MAX_VALUE;
+        for (int rowOffset = -1; rowOffset <= 1; rowOffset++) {
+            for (int columnOffset = -1; columnOffset <= 1; columnOffset++) {
+                int row = targetRow + rowOffset;
+                int column = targetColumn + columnOffset;
+                if (!isWalkable(row, column)) {
+                    continue;
+                }
+                int distanceToStart = Math.abs(row - startRow) + Math.abs(column - startColumn);
+                if (distanceToStart < bestDistance) {
+                    bestDistance = distanceToStart;
+                    best = new Point(row, column);
+                }
             }
-        } while (EmptyUtil.isNotEmpty(open) && !open.contains(endNode));
-        // 知道开启列表中包含终点时，循环退出
-        inClose(endNode, open);
-        List<Point> path = null;
-        if (EmptyUtil.isNotEmpty(close)) {
-            path = new ArrayList<>();
-            Node node = endNode;
-            while (node != null && !(node.getX() == startX && node.getY() == startY)) {
-                Point point = new Point(node.getX(), node.getY());
-                path.add(point);
-                node = node.getFatherNode();
-            }
+        }
+        return best;
+    }
+
+    private List<Point> buildReversePath(Node destination) {
+        List<Point> path = new ArrayList<>();
+        for (Node node = destination; node.parent != null; node = node.parent) {
+            path.add(new Point(node.row, node.column));
         }
         return path;
     }
 
-    private Node getDirectNode(Node node, Direct direct) {
-        var x = node.getX();
-        var y = node.getY();
-        switch (direct) {
-            case UP -> {
-                if (x - 1 >= 0) {
-                    return map[x - 1][y];
-                }
-            }
-            case RIGHT -> {
-                if (y + 1 < map[0].length) {
-                    return map[x][y + 1];
-                }
-            }
-            case DOWN -> {
-                if (x + 1 < map.length) {
-                    return map[x + 1][y];
-                }
-            }
-            case LEFT -> {
-                if (y - 1 >= 0) {
-                    return map[x][y - 1];
-                }
-            }
-            case LEFT_UP -> {
-                if (x - 1 >= 0 && y - 1 >= 0) {
-                    return map[x - 1][y - 1];
-                }
-            }
-            case RIGHT_UP -> {
-                if (x - 1 >= 0 && y + 1 < map[0].length) {
-                    return map[x - 1][y + 1];
-                }
-            }
-            case RIGHT_DOWN -> {
-                if (x + 1 < map.length && y + 1 < map[0].length) {
-                    return map[x + 1][y + 1];
-                }
-            }
-            case LEFT_DOWN -> {
-                if (x + 1 < map.length && y - 1 >= 0) {
-                    return map[x + 1][y - 1];
-                }
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + direct);
-        }
-        return null;
+    private int heuristic(int row, int column, Point destination) {
+        return Math.abs(row - destination.x) + Math.abs(column - destination.y);
     }
-}
 
-@Data
-@NoArgsConstructor
-class Node {
-    private int x; // x坐标
-    private int y; // y坐标
-    private int f; // F值
-    private int g; // G值
-    private int h; // H值
-    private Boolean cango; // 是否可到达（是否为障碍物）
-    private Node fatherNode; // 父节点
+    private boolean isWalkable(int row, int column) {
+        return inBounds(row, column) && (map[row][column] == 0 || row == startRow && column == startColumn);
+    }
 
-    public Node(int x, int y, boolean reachable) {
-        super();
-        this.x = x;
-        this.y = y;
-        this.f = 0;
-        this.g = 0;
-        this.h = 0;
-        this.cango = reachable;
+    private boolean inBounds(int row, int column) {
+        return row >= 0 && row < map.length && column >= 0 && column < map[0].length;
+    }
+
+    private record Node(int row, int column, int distance, int heuristic, Node parent) {
+        int estimatedTotal() {
+            return distance + heuristic;
+        }
     }
 }

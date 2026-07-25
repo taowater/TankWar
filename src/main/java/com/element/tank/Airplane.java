@@ -20,23 +20,12 @@ public  class Airplane extends Player {
 
     @Override
     public void draw(Graphics g) {
-        g.drawImage(getImage(), getX(), getY(), 32, 32, Game.stage);
         if (star.getIsLive()) {
             star.draw(g);
         } else if (getIsLive()) {
-            star.dispose();
             g.drawImage(getImage(), getX(), getY(), getWidth(), getHeight(), Game.stage);
             if (flash.getIsLive()) {
                 flash.draw(g);
-            }
-            if (!Game.pause) {
-                setOldPosition();
-                active();
-                beRewarded();
-            }
-        } else {
-            if (getMaxlife() > 0) {
-                reborn();
             }
         }
     }

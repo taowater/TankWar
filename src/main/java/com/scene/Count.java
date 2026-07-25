@@ -2,12 +2,11 @@ package com.scene;
 
 import com.game.Game;
 import com.game.TankWar;
+import com.util.ImageUtil;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
-
-import javax.swing.ImageIcon;
 
 public class Count extends Scene {
     private int[] level;
@@ -48,8 +47,7 @@ public class Count extends Scene {
             Game.drawText("TOTAL", this.getWidth() - 128 - 16 * 4, 32 * 9 + 16 * 4, 2, g, this);
             Game.drawText(sum_mask2 + "", this.getWidth() - 64 - 16 * 10, 32 * 4, 2, g, this);
         }
-        ImageIcon tankmodel = new ImageIcon("image/tankmodel.png");
-        g.drawImage(tankmodel.getImage(), (this.getWidth() - 26) / 2, 32 * 5 + 16 - 10, 26, 174, this);
+        g.drawImage(ImageUtil.getMaterial("tankmodel"), (this.getWidth() - 26) / 2, 32 * 5 + 16 - 10, 26, 174, this);
         for (int i = 0; i < 4; i++) {
             Game.drawText("PTS", 112, 32 * (5 + i) + 16 * (i + 1), 2, g, this);
             if ((lev[i] + "").length() < 2) {
@@ -71,12 +69,10 @@ public class Count extends Scene {
         if(index==3){
             if (lev[index] == level[index]) {
                 Game.drawText(sum + "", 128 + 48 + x, 32 * 9 + 16 * 4, 2, g, this);
-                repaint();
             }
-            if(Game.stage.getPlayers().size()>1){
+            if(Game.player_number > 1){
                 if (lev2[index] == level2[index]) {
                     Game.drawText(sum2 + "", 128 + 48 + 96 + x, 32 * 9 + 16 * 4, 2, g, this);
-                    repaint();
                 }
             }
         }
@@ -85,7 +81,8 @@ public class Count extends Scene {
     public void KeyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (!Game.fail) {
-                if (Game.stagesth < 6) {
+                Game.pause = false;
+                if (Game.stagesth < Game.MAX_STAGE) {
                     Game.stagesth++;
                 } else {
                     Game.stagesth = 1;
@@ -98,17 +95,13 @@ public class Count extends Scene {
         }
     }
 
-    public void run() {
-        while (true) {
-            Game.Sleep(30);
-            if (lev[index] < level[index]) {
-                lev[index]++;
-            } else if (lev2[index] < level2[index]) {
-                lev2[index]++;
-            } else if (index < 3) {
-                index++;
-            }
-            repaint();
+    protected void updateScene() {
+        if (lev[index] < level[index]) {
+            lev[index]++;
+        } else if (lev2[index] < level2[index]) {
+            lev2[index]++;
+        } else if (index < 3) {
+            index++;
         }
     }
 }

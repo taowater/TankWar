@@ -19,7 +19,6 @@ import com.taowater.ztream.Ztream;
 import com.util.MusicUtil;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -87,15 +86,15 @@ public class Stage extends Scene {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        removeDeath();
         drawElements(g);
         if (fogFlag) {
-            Ztream.of(getPlayers()).forEach(e -> drawFog(e, g));
+            drawFog(g);
         }
         drawGame(g);
     }
 
     private void init() {
+        CountData.reset();
         setLayout(null);
         setGameMap();
         setBounds(32, 32, width, height);
@@ -176,21 +175,31 @@ public class Stage extends Scene {
     }
 
     // 描绘迷雾
-    private void drawFog(Player player, Graphics g) {
+    private void drawFog(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
-        AlphaComposite ac;
+        Composite originalComposite = g2d.getComposite();
         g.setColor(Color.GRAY);
         for (int i = 0; i < fog.length; i++) {
             for (int j = 0; j < fog[0].length; j++) {
-                int a = Math.abs(player.getX() + 8 - j * 16);
-                int b = Math.abs(player.getY() + 8 - i * 16);
-                var sqrt = Math.sqrt((double) (a * a) + (b * b));
-                if (sqrt >= 32 * 4 && fog[i][j] <= 96) {
-                    ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) ((96 - fog[i][j]) / 96.0));
-                    g2d.setComposite(ac);
+                if (fog[i][j] <= 96) {
+                    float alpha = (96 - fog[i][j]) / 96.0f;
+                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
                     g2d.fillRect(j * 16, i * 16, 16, 16);
-                } else if (sqrt < 120) {
-                    fog[i][j] = 256;
+                }
+            }
+        }
+        g2d.setComposite(originalComposite);
+    }
+
+    private void updateFog() {
+        for (Player player : getPlayers()) {
+            for (int i = 0; i < fog.length; i++) {
+                for (int j = 0; j < fog[0].length; j++) {
+                    int xDistance = player.getX() + 8 - j * 16;
+                    int yDistance = player.getY() + 8 - i * 16;
+                    if (Math.hypot(xDistance, yDistance) < 120) {
+                        fog[i][j] = 256;
+                    }
                 }
             }
         }
@@ -206,7 +215,8 @@ public class Stage extends Scene {
     // 获取当前战场二维地图
     public int[][] getMap() {
         int[][] map = new int[getHeight() / 16][getWidth() / 16];
-        Ztream.of(Game.getStage().getMapElements()).forEach(e -> map[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1);
+        Ztream.of(getMapElements()).filter(Element::getIsLive)
+                .forEach(e -> map[e.getY() / 16][e.getX() / 16] = e.getMapType().ordinal() + 1);
         return map;
     }
 
@@ -263,8 +273,8 @@ public class Stage extends Scene {
             }
             case 2 -> this.pausetime = 128;
             case 3 -> {
-                player.flash.life = 64;
-                player.flash.setIsLive(false);
+                player.flash.setLife(64);
+                player.flash.setIsLive(true);
             }
             case 4 -> Ztream.of(getEnemies()).forEach(Enemy::death);
             case 5 -> player.setMaxlife(player.getMaxlife() + 1);
@@ -281,9 +291,6 @@ public class Stage extends Scene {
     private void gameOver(Graphics g) {
         Game.drawText("GAME", width / 2 - 32 - 16, overY, 4, g, this);
         Game.drawText("OVER", width / 2 - 32 - 16, overY + 16, 4, g, this);
-        if (overY > height / 2 - 16) {
-            overY -= 8;
-        }
     }
 
     public void keyPressed(KeyEvent e) {
@@ -308,12 +315,14 @@ public class Stage extends Scene {
     }
 
     @Override
-    @SneakyThrows
-    public void run() {
-        while (true) {
-            repaint();
-            Game.Sleep(30);
-            System.out.println("---");
+    protected void updateScene() {
+        if (!Game.pause) {
+            for (Element element : List.copyOf(elements)) {
+                if (element.getIsLive()) {
+                    element.update();
+                }
+            }
+            removeDeath();
             creatEnemy();
             if (!fort.getIsLive() || EmptyUtil.isEmpty(getPlayers())) {
                 Game.fail = true;
@@ -324,22 +333,24 @@ public class Stage extends Scene {
             if (starttime > 0) {
                 starttime--;
             }
-            if (enumber == 0 && EmptyUtil.isEmpty(getEnemies())) {
+            if (fogFlag) {
+                updateFog();
+            }
+            if (enumber <= 0 && EmptyUtil.isEmpty(getEnemies())) {
                 over = true;
             }
-            if (overY == height / 2 - 16 || over) {
-                waittime--;
-            }
-            if (waittime == 0) {
-                isLive = false;
-                dispose();
-            }
-            flag = Game.Reduce(flag, 0, 16, 1);
-            if (!isLive) {
-                Robot robot = new Robot();
-                robot.keyPress(KeyEvent.VK_SPACE);
-                break;
-            }
+        }
+        if (Game.fail && overY > height / 2 - 16) {
+            overY -= 8;
+        }
+        if ((Game.fail && overY <= height / 2 - 16) || over) {
+            waittime--;
+        }
+        flag = Game.Reduce(flag, 0, 16, 1);
+        if (waittime <= 0) {
+            isLive = false;
+            stopScene();
+            tankWar.toCount();
         }
     }
 
@@ -347,5 +358,10 @@ public class Stage extends Scene {
     public static class CountData {
         public static final int[] LEVEL = {0, 0, 0, 0};
         public static final int[] LEVEL_2 = {0, 0, 0, 0};
+
+        public static void reset() {
+            java.util.Arrays.fill(LEVEL, 0);
+            java.util.Arrays.fill(LEVEL_2, 0);
+        }
     }
 }

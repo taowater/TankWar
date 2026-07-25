@@ -6,11 +6,22 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public abstract class Scene extends JPanel implements Runnable, MouseMotionListener, MouseListener {
 
+    private final Timer timer;
+
     protected Scene(){
+        this(30);
+    }
+
+    protected Scene(int tickMillis) {
         super(true);
+        timer = new Timer(tickMillis, event -> {
+            updateScene();
+            repaint();
+        });
     }
 
     int flag = 16;
@@ -43,7 +54,21 @@ public abstract class Scene extends JPanel implements Runnable, MouseMotionListe
     public void mouseMoved(MouseEvent arg0) {
     }
 
-    public void run() {
+    protected void updateScene() {
     }
 
+    public final void startScene() {
+        if (!timer.isRunning()) {
+            timer.start();
+        }
+    }
+
+    public void stopScene() {
+        timer.stop();
+    }
+
+    @Override
+    public final void run() {
+        startScene();
+    }
 }

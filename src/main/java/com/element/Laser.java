@@ -46,6 +46,9 @@ public class Laser extends Bullet {
 
     @Override
     public void death() {
+        if (!getIsLive()) {
+            return;
+        }
         setIsLive(false);
         getMaster().decrBulletNum();
     }
@@ -54,18 +57,17 @@ public class Laser extends Bullet {
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage16("bullet_2", getDirect().ordinal() * 16, 0));
         g.drawImage(getImage(), getX(), getY(), getWidth(), getHeight(), Game.getStage());
+    }
+
+    @Override
+    public void update() {
         if (getLife() > 0) {
             setLife(getLife() - 1);
         } else {
             death();
             return;
         }
-        if (!Game.pause) {
-            bitTank();
-        }
-        if (!isInStage()) {
-            death();
-        }
+        bitTank();
     }
 
     private void length() {
@@ -74,33 +76,53 @@ public class Laser extends Bullet {
         int masterY = master.getY();
         int masterWidth = master.getWidth();
         int masterHeight = master.getHeight();
-        Ztream.of(Game.getStage().getMapElements()).forEach(e -> {
-            if (isTouch(e) && !e.getMapType().isBulletGo()) {
-                int eX = e.getX();
-                int eY = e.getY();
-                int eWidth = e.getWidth();
-                int eHeight = e.getHeight();
-                switch (getDirect()) {
-                    case UP -> {
-                        eHeight = masterY - (eY + eHeight);
-                        setY(masterY - eHeight);
-                    }
-                    case DOWN -> {
-                        setHeight(eY - (masterY + masterHeight));
-                        setY(masterY + 32);
-                    }
-                    case RIGHT -> {
-                        setWidth(eX - (masterX + masterWidth));
-                        setX(masterX + 32);
-                    }
-                    case LEFT -> {
-                        eWidth = masterX - (eX + eWidth);
-                        setX(masterX - eWidth);
-                    }
-                    default -> {
-                    }
-                }
+        var obstacles = Game.getStage().getMapElements().stream()
+                .filter(e -> e.getIsLive() && !e.getMapType().isBulletGo())
+                .toList();
+        switch (getDirect()) {
+            case UP -> {
+                int end = obstacles.stream()
+                        .filter(e -> e.getX() < masterX + masterWidth && e.getX() + e.getWidth() > masterX)
+                        .filter(e -> e.getY() + e.getHeight() <= masterY)
+                        .mapToInt(e -> e.getY() + e.getHeight()).max().orElse(0);
+                setX(masterX);
+                setY(end);
+                setWidth(masterWidth);
+                setHeight(masterY - end);
             }
-        });
+            case DOWN -> {
+                int start = masterY + masterHeight;
+                int end = obstacles.stream()
+                        .filter(e -> e.getX() < masterX + masterWidth && e.getX() + e.getWidth() > masterX)
+                        .filter(e -> e.getY() >= start)
+                        .mapToInt(Element::getY).min().orElse(Game.getStage().getHeight());
+                setX(masterX);
+                setY(start);
+                setWidth(masterWidth);
+                setHeight(Math.max(0, end - start));
+            }
+            case RIGHT -> {
+                int start = masterX + masterWidth;
+                int end = obstacles.stream()
+                        .filter(e -> e.getY() < masterY + masterHeight && e.getY() + e.getHeight() > masterY)
+                        .filter(e -> e.getX() >= start)
+                        .mapToInt(Element::getX).min().orElse(Game.getStage().getWidth());
+                setX(start);
+                setY(masterY);
+                setWidth(Math.max(0, end - start));
+                setHeight(masterHeight);
+            }
+            case LEFT -> {
+                int end = obstacles.stream()
+                        .filter(e -> e.getY() < masterY + masterHeight && e.getY() + e.getHeight() > masterY)
+                        .filter(e -> e.getX() + e.getWidth() <= masterX)
+                        .mapToInt(e -> e.getX() + e.getWidth()).max().orElse(0);
+                setX(end);
+                setY(masterY);
+                setWidth(masterX - end);
+                setHeight(masterHeight);
+            }
+            default -> { }
+        }
     }
 }

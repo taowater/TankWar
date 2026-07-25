@@ -6,7 +6,6 @@ import com.taowater.ztream.Ztream;
 import com.util.ImageUtil;
 
 import java.awt.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class Wave extends Bullet {
@@ -40,17 +39,19 @@ public class Wave extends Bullet {
 
     @Override
     public boolean bitTank() {
-        AtomicBoolean flag = new AtomicBoolean(false);
-        Ztream.of(Game.getStage().getEnemies()).parallel().forEach(e -> {
-            if (isTouch(e)) {
-                e.setIsLive(false);
-                flag.set(true);
+        boolean hit = false;
+        for (var enemy : Game.getStage().getEnemies()) {
+            if (enemy.getIsLive() && isTouch(enemy)) {
+                hit |= hitEnemy(enemy);
             }
-        });
-        return flag.get();
+        }
+        return hit;
     }
 
     public void death() {
+        if (!getIsLive()) {
+            return;
+        }
         setIsLive(false);
         getMaster().decrBulletNum();
     }
@@ -59,10 +60,10 @@ public class Wave extends Bullet {
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage192("wave", getDirect().ordinal() * 192, 0));
         g.drawImage(getImage(), getX(), getY(), 192, 192, Game.getStage());
+    }
 
-        if (Game.pause) {
-            return;
-        }
+    @Override
+    public void update() {
         bitTank();
         if (getReach() > 0) {
             setReach(getReach() - 1);

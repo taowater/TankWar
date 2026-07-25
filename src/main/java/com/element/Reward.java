@@ -28,6 +28,10 @@ public class Reward extends Element {
         if (getLife() > 0 && isDraw) {
             super.draw(g);
         }
+    }
+
+    @Override
+    public void update() {
         time--;
         if (time < 0) {
             isDraw = !isDraw;

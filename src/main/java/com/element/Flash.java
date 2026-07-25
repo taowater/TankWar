@@ -9,18 +9,20 @@ import java.awt.*;
 public class Flash extends Element {
 
     private final Player master;
-    public int life;
-
     public Flash(Player player) {
         super(player.getX(), player.getY());
         this.master = player;
-        this.life = 32;
+        setLife(32);
     }
 
     @Override
     public void draw(Graphics g) {
-        setImage(ImageUtil.getSubImage32("material", life % 2 * 32, 32));
+        setImage(ImageUtil.getSubImage32("material", getLife() % 2 * 32, 32));
         g.drawImage(getImage(), master.getX(), master.getY(), getWidth(), getHeight(), Game.getStage());
+    }
+
+    @Override
+    public void update() {
         downLife();
     }
 }

@@ -43,6 +43,7 @@ public class Title extends Scene {
 
     @Override
     public void paint(Graphics g) {
+        super.paint(g);
         g.setColor(Color.black);
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
         if (open) {
@@ -51,6 +52,14 @@ public class Title extends Scene {
 
         Ztream.of(logo).append(logo2).append(logoRemove).forEach(e -> e.draw(g, this));
 
+        if (!open) {
+            drawPressAnyKey(g);
+        }
+    }
+
+    @Override
+    protected void updateScene() {
+        flag = !flag;
         Ztream.of(logoRemove).forEach(e -> {
             if (e.getY() > 0 && e.getX() < TankWar.WIDTH) {
                 e.setY(e.getY() - Game.rand(10));
@@ -60,18 +69,22 @@ public class Title extends Scene {
             }
         });
         logoRemove.removeIf(e -> !e.getIsLive());
-        if (!open) {
-            drawPressAnyKey(g);
+        if (System.currentTimeMillis() - startTime > 500) {
+            pressFlag = !pressFlag;
+            startTime = System.currentTimeMillis();
+        }
+        if (Game.rand(5) < 2 && logo2.size() > 1) {
+            Collections.shuffle(logo2);
+            Brick brick = logo2.remove(0);
+            Brick brick2 = logo2.remove(logo2.size() - 1);
+            logoRemove.add(brick);
+            logoRemove.add(brick2);
         }
     }
 
     private void drawPressAnyKey(Graphics g) {
         if (pressFlag) {
-            Game.drawText("PRESS ANYKEY", (TankWar.WIDTH - 14 * 16) / 2, 300, 2, g, this);
-        }
-        if (System.currentTimeMillis() - startTime > 500) {
-            pressFlag = !pressFlag;
-            startTime = System.currentTimeMillis();
+            Game.drawText("PRESS ANY KEY", (TankWar.WIDTH - 14 * 16) / 2, 300, 2, g, this);
         }
     }
 
@@ -89,7 +102,6 @@ public class Title extends Scene {
     }
 
     private void drawIndexItem(int x, int y, Graphics g) {
-        flag = !flag;
         indexItem = tankImage.getSubimage(flag ? 28 : 0, 28, 28, 28);
         g.drawImage(indexItem, x + 160, y + MENU_INDEX + 32 * index, 28, 28, this);
     }
@@ -108,51 +120,29 @@ public class Title extends Scene {
     }
 
     public void keyPressed(KeyEvent e) {
-
         if (!open) {
             open = true;
             logo2.clear();
             logoRemove.clear();
             return;
         }
-        if (open) {
-            if (e.getKeyCode() == KeyEvent.VK_UP) {
-                upIndex();
-            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                downIndex();
-            } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
-                if (menu == Game.title_menu) {
-                    switch (index) {
-                        case 0 -> toSelect();
-                        case 1 -> tankWar.toEditor();
-                        default -> {
-                        }
-                    }
-                } else if (menu == Game.title_menu2) {
-                    Game.player_number = index + 1;
-                    tankWar.toGameStart();
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            upIndex();
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+            downIndex();
+        } else if (e.getKeyCode() == KeyEvent.VK_SPACE || e.getKeyCode() == KeyEvent.VK_ENTER) {
+            if (menu == Game.title_menu) {
+                switch (index) {
+                    case 0 -> toSelect();
+                    case 1 -> tankWar.toEditor();
+                    default -> { }
                 }
-            } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && menu == Game.title_menu2) {
-                this.menu = Game.title_menu;
+            } else {
+                Game.player_number = index + 1;
+                tankWar.toGameStart();
             }
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            if (Game.rand(5) < 2 && logo2.size() > 1) {
-                Collections.shuffle(logo2);
-                Brick brick = logo2.get(0);
-                logo2.remove(brick);
-                Brick brick2 = logo2.get(logo2.size() - 1);
-                logo2.remove(brick2);
-
-                logoRemove.add(brick);
-                logoRemove.add(brick2);
-            }
-            repaint();
-            Game.Sleep(30);
+        } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE && menu == Game.title_menu2) {
+            this.menu = Game.title_menu;
         }
     }
 }

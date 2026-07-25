@@ -5,6 +5,7 @@ import com.element.enums.Direct;
 import com.game.Game;
 import com.taowater.ztream.Ztream;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 
 // 坦克的类，所有坦克的父类
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 public class Tank extends MoveElement {
 
@@ -56,7 +58,7 @@ public class Tank extends MoveElement {
     }
 
     public void decrBulletNum() {
-        this.bulletNum--;
+        this.bulletNum = Math.max(0, this.bulletNum - 1);
     }
 
     void initMove() {

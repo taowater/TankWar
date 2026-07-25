@@ -19,6 +19,10 @@ public class Water extends MapElement {
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage16("map", 3 * 16, (flag % 2) * 16));
         g.drawImage(getImage(), getX(), getY(), 16, 16, Game.getStage());
+    }
+
+    @Override
+    public void update() {
         flag = RangeUtil.right(0, flag, 4);
     }
 }

@@ -19,6 +19,10 @@ public class Star extends Element {
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage32("material", getLife() % 7 * 32, 0));
         super.draw(g);
+    }
+
+    @Override
+    public void update() {
         downLife();
     }
 }

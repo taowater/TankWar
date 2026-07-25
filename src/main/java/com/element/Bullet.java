@@ -18,14 +18,14 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 //子弹的类
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Bullet extends MoveElement {
-    static int[] list = null;
+    private int[] hitParts;
     boolean canTurn;
     private Tank master;
     /**
@@ -63,15 +63,16 @@ public class Bullet extends MoveElement {
     @Override
     public void draw(Graphics g) {
         setImage(ImageUtil.getSubImage16("bullet", getDirect().ordinal() * 16, 0));
-
-        if (!isTouch(master)) {
+        if (getIsLive() && !isTouch(master)) {
             g.drawImage(getImage(), getX() + 8, getY() + 8, 16, 16, Game.getStage());
         }
-        if (Game.pause) {
-            return;
-        }
+    }
+
+    @Override
+    public void update() {
         if (!isInStage()) {
             death();
+            return;
         }
         setOldPosition();
         normalFly();
@@ -80,6 +81,7 @@ public class Bullet extends MoveElement {
         }
         if (bitFort(Game.stage.fort) || bitTank() || bitBrick() || bitBullet()) {
             death();
+            return;
         }
         if (reach > 0) {
             reach--;
@@ -89,6 +91,9 @@ public class Bullet extends MoveElement {
     }
 
     public void death() {
+        if (!getIsLive()) {
+            return;
+        }
         this.setIsLive(false);
         master.decrBulletNum();
         Bomb bomb = new Bomb(getX(), getY());
@@ -105,48 +110,52 @@ public class Bullet extends MoveElement {
     }
 
     private boolean bitBullet() {
-        AtomicBoolean flag = new AtomicBoolean(false);
-        Ztream.of(Game.getStage().getBullets()).parallel().forEach(b -> {
-            if (this != b && this.master != b.master && isTouch(b)) {
+        boolean hit = false;
+        for (Bullet b : Game.getStage().getBullets()) {
+            if (this != b && b.getIsLive() && this.master != b.master && isTouch(b)) {
                 b.death();
-                flag.set(true);
+                hit = true;
             }
-        });
-        return flag.get();
+        }
+        return hit;
     }
 
     protected boolean bitTank() {
-        AtomicBoolean flag = new AtomicBoolean(false);
-        Ztream.of(Game.getStage().getTanks()).forEach(tank -> {
-            if (master == tank || !isTouch(tank)) {
-                return;
+        boolean hit = false;
+        for (Tank tank : Game.getStage().getTanks()) {
+            if (master == tank || !tank.getIsLive() || !isTouch(tank)) {
+                continue;
             }
             if (tank instanceof Player player) {
-                player.decrMaxLife();
-                player.setIsLive(false);
-                flag.set(true);
-            } else if (tank instanceof Enemy enemy) {
-                if (master instanceof Player player) {
-                    if (Game.stage.getPlayers().size() < 2) {
-                        Stage.CountData.LEVEL[enemy.getType()]++;
-                    } else {
-                        if (master == Game.stage.getPlayers().get(0)) {
-                            Stage.CountData.LEVEL[enemy.getType()]++;
-                        } else {
-                            Stage.CountData.LEVEL_2[enemy.getType()]++;
-                        }
-                    }
-                    enemy.death();
-                    enemy.setBitdead(true);
-                    player.setScore(player.getScore() + enemy.getMask());
-                    if (enemy.getWithReward()) {
-                        Game.stage.creatReward();
-                    }
-                    flag.set(true);
+                if (!player.flash.getIsLive()) {
+                    player.decrMaxLife();
+                    player.setIsLive(false);
                 }
+                hit = true;
+            } else if (tank instanceof Enemy enemy) {
+                hit |= hitEnemy(enemy);
             }
-        });
-        return flag.get();
+        }
+        return hit;
+    }
+
+    protected boolean hitEnemy(Enemy enemy) {
+        if (!(master instanceof Player player) || !enemy.getIsLive()) {
+            return false;
+        }
+        List<Player> players = Game.stage.getPlayers();
+        if (players.size() < 2 || master == players.get(0)) {
+            Stage.CountData.LEVEL[enemy.getType()]++;
+        } else {
+            Stage.CountData.LEVEL_2[enemy.getType()]++;
+        }
+        enemy.death();
+        enemy.setBitdead(true);
+        player.setScore(player.getScore() + enemy.getMask());
+        if (enemy.getWithReward()) {
+            Game.stage.creatReward();
+        }
+        return true;
     }
 
     public Rectangle getRect() {
@@ -156,39 +165,36 @@ public class Bullet extends MoveElement {
         return super.getRect();
     }
 
-    private MapElement[] getbBitElement() {
+    private List<MapElement> getHitElements() {
         List<MapElement> elements = Game.getStage().getMapElements();
-        MapElement[] elements_temp = new MapElement[3];
-        int index = 0;
-
+        List<MapElement> hitElements = new ArrayList<>();
         for (MapElement element : elements) {
             if (isTouch(element) && element.getIsLive() && !element.getMapType().isBulletGo()) {
-                elements_temp[index++] = element;
-                death();
-            }
-            if (index > 2) {
-                break;
+                hitElements.add(element);
             }
         }
-        return elements_temp;
+        return hitElements;
     }
 
-    private void bitSmallBrick(MapElement[] elements, int begin) {
+    private void bitSmallBrick(List<MapElement> elements, int begin) {
         Ztream.of(elements).forEach(e -> {
             if (e instanceof Brick brick) {
                 for (int i = begin; i - begin < 2; i++) {
-                    brick.flag[list[i]] = false;
+                    brick.flag[hitParts[i]] = false;
                 }
             }
         });
     }
 
     private boolean bitBrick() {
-        MapElement[] elements = getbBitElement();
+        List<MapElement> elements = getHitElements();
+        if (elements.isEmpty()) {
+            return false;
+        }
         boolean flag = false;
         if (getDirect().ordinal() > 3) {
             for (MapElement mapElement : elements) {
-                if (mapElement != null && !mapElement.getMapType().isBulletGo()) {
+                if (!mapElement.getMapType().isBulletGo()) {
                     if (mapElement instanceof Iron) {
                         if (master instanceof Player player && player.getLevel() > 2) {
                             mapElement.setIsLive(false);
@@ -201,19 +207,16 @@ public class Bullet extends MoveElement {
                 }
             }
         } else {
-            MapElement[] element_temp = new MapElement[4];
-            boolean[] isSmallElementLive = new boolean[element_temp.length];
-            for (int key = 0; key < elements.length; key++) {
-                MapElement mapElement = elements[key];
-                if (mapElement != null) {
-                    if (mapElement instanceof Brick brick) {
-                        isSmallElementLive[key] = (brick.flag[list[0]] || brick.flag[list[1]]);
-                    } else if (mapElement instanceof Iron) {
-                        if (master instanceof Player player) {
-                            if (player.getLevel() > 2) {
-                                mapElement.setIsLive(false);
-                                return true;
-                            }
+            boolean[] isSmallElementLive = new boolean[elements.size()];
+            for (int key = 0; key < elements.size(); key++) {
+                MapElement mapElement = elements.get(key);
+                if (mapElement instanceof Brick brick) {
+                    isSmallElementLive[key] = (brick.flag[hitParts[0]] || brick.flag[hitParts[1]]);
+                } else if (mapElement instanceof Iron) {
+                    if (master instanceof Player player) {
+                        if (player.getLevel() > 2) {
+                            mapElement.setIsLive(false);
+                            return true;
                         }
                     }
                 }
@@ -230,7 +233,7 @@ public class Bullet extends MoveElement {
                 bitSmallBrick(elements, 2);
             }
         }
-        return flag;
+        return true;
     }
 
     private void normalFly() {
@@ -238,19 +241,19 @@ public class Bullet extends MoveElement {
         int n = (int) (speed / Math.sqrt(2));
         switch (getDirect()) {
             case UP:// 上
-                list = new int[]{2, 3, 0, 1};
+                hitParts = new int[]{2, 3, 0, 1};
                 decrY(speed);
                 break;
             case RIGHT:// 右
-                list = new int[]{0, 2, 1, 3};
+                hitParts = new int[]{0, 2, 1, 3};
                 incrX(speed);
                 break;
             case DOWN:// 下
-                list = new int[]{0, 1, 2, 3};
+                hitParts = new int[]{0, 1, 2, 3};
                 incrY(speed);
                 break;
             case LEFT:// 左
-                list = new int[]{1, 3, 0, 2};
+                hitParts = new int[]{1, 3, 0, 2};
                 decrX(speed);
                 break;
             case LEFT_UP:// 左上

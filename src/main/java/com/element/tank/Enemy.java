@@ -60,57 +60,64 @@ public class Enemy extends Tank {
     @Override
     public void draw(Graphics g) {
         int offset = imageFlag ? 1 : 0;
-        imageFlag = !imageFlag;
         int tempX = withReward && flashTime > 1 ? type * 28 * 4 + 2 * 28 : type * 28 * 4 + offset * 28;
         setImage(ImageUtil.getSubImage28("enemy", tempX, getDirect().ordinal() * 28));
         super.draw(g);
-        if (!Game.pause && Game.stage.pausetime == 0) {
+    }
+
+    @Override
+    public void update() {
+        imageFlag = !imageFlag;
+        if (star.getIsLive()) {
+            star.update();
+        } else if (Game.stage.pausetime == 0) {
             if (getX() % 16 == 0 && getY() % 16 == 0) {
                 setOldPosition();
                 setGoing(false);
             } else {
                 setGoing(true);
             }
-            if (!star.getIsLive()) {
-                switch (type) {
-                    case 0 -> {
-                        randomGo();
-                        if (Game.rand(60) == 1) {
-                            shoot();
-                        }
+            switch (type) {
+                case 0 -> {
+                    randomGo();
+                    if (Game.rand(60) == 1) {
+                        shoot();
                     }
-                    case 1 -> {
-                        if (getY() / 16 < 24) {
-                            goToFort();
-                        } else {
-                            randomGo();
-                        }
-                        if (canBit(Game.stage.fort) && Game.rand(30) == 1) {
-                            shoot();
-                        }
-                    }
-                    case 2 -> {
-                        randomGo();
-                        if (canBit(Game.stage.getAnyPlayer()) && Game.rand(50) == 1) {
-                            shoot();
-                        }
-                    }
-                    case 3 -> {
-                        trackMove();
-                        if (canBit(Game.stage.getAnyPlayer()) && Game.rand(10) == 1) {
-                            shoot();
-                        }
-                    }
-                    default -> throw new IllegalStateException("Unexpected value: " + type);
                 }
+                case 1 -> {
+                    if (getY() / 16 < 24) {
+                        goToFort();
+                    } else {
+                        randomGo();
+                    }
+                    if (canBit(Game.stage.fort) && Game.rand(30) == 1) {
+                        shoot();
+                    }
+                }
+                case 2 -> {
+                    randomGo();
+                    if (canBit(Game.stage.getAnyPlayer()) && Game.rand(50) == 1) {
+                        shoot();
+                    }
+                }
+                case 3 -> {
+                    trackMove();
+                    if (canBit(Game.stage.getAnyPlayer()) && Game.rand(10) == 1) {
+                        shoot();
+                    }
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + type);
             }
         }
         flashTime = Game.Reduce(flashTime, 0, 3, 1);
     }
 
     public void death() {
+        if (!getIsLive()) {
+            return;
+        }
         setIsLive(false);
-        Game.stage.enumber--;
+        Game.stage.enumber = Math.max(0, Game.stage.enumber - 1);
         Game.getStage().addElement(new BigBomb(getX(), getY()));
     }
 

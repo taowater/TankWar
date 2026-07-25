@@ -5,7 +5,6 @@ import com.element.map.*;
 import com.scene.Stage;
 import com.taowater.ztream.Any;
 import com.util.ImageUtil;
-import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
 import javax.swing.*;
@@ -13,8 +12,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.FileReader;
-import java.net.URLDecoder;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +48,7 @@ public class Game {
     public static String[] title_menu = {"NEW GAME", "CONSTRUCTION"};
     public static String[] title_menu2 = {"1 PLAYER", "2 PLAYERS"};
     public static boolean[] bulletcango = {true, true, true, false, true, false};
+    public static final int MAX_STAGE = 8;
 
     public static int Reduce(int n, int left, int right, int step) {
         if (n > left) {
@@ -88,13 +89,10 @@ public class Game {
 
     public static void GameInit() {
         Game.fail = false;
+        Game.pause = false;
+        Game.stage = null;
         Game.tankWar.setSize(TankWar.WIDTH, TankWar.HEIGHT);
         Game.stagesth = 1;
-    }
-
-    @SneakyThrows
-    public static void Sleep(int time) {
-        Thread.sleep(time);
     }
 
     public static Stage getStage() {
@@ -128,35 +126,41 @@ public class Game {
         return Any.of(mapBuilder.get(type)).get(f -> f.apply(x, y));
     }
 
-    @SneakyThrows
-    public static String getPath(String path) {
-        String realPath = Game.class.getClassLoader().getResource(path).getPath();
-        return URLDecoder.decode(realPath, StandardCharsets.UTF_8);
+    public static InputStream getResource(String path) {
+        InputStream stream = Game.class.getClassLoader().getResourceAsStream(path);
+        if (stream == null) {
+            throw new IllegalArgumentException("Resource not found: " + path);
+        }
+        return stream;
     }
 
     public static int[][] getMap(int stage) {
         return MAP_CACHE.computeIfAbsent(stage, Game::doGetMap);
     }
 
-    @SneakyThrows
     public static int[][] doGetMap(int stage) {
         int[][] map;
         int length = 0;
         int length2 = 0;
         StringBuilder string = new StringBuilder();
         String str;
-        String name = STR."map/map\{stage}.txt";
+        String name = "map/map" + stage + ".txt";
 
-        String path = getPath(name);
-        try (BufferedReader bf = new BufferedReader(new FileReader(path))) {
-            while (true) {
-                if ((str = bf.readLine()) == null) {
-                    break;
+        try (BufferedReader bf = new BufferedReader(new InputStreamReader(getResource(name), StandardCharsets.UTF_8))) {
+            while ((str = bf.readLine()) != null) {
+                if (length == 0) {
+                    length = str.length();
+                } else if (length != str.length()) {
+                    throw new IllegalArgumentException("Map rows have different widths: " + name);
                 }
-                length = str.length();
+                if (!str.matches("[0-5]+")) {
+                    throw new IllegalArgumentException("Map contains an invalid tile: " + name);
+                }
                 string.append(str);
                 length2++;
             }
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read map resource: " + name, e);
         }
 
         int index = 0;

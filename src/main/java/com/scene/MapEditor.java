@@ -141,8 +141,4 @@ public class MapEditor extends Scene {
         repaint();
     }
 
-    public void run() {
-        Game.Sleep(30);
-        repaint();
-    }
 }

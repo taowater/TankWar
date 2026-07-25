@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import com.util.ImageUtil;
+
 public class TankWar extends JFrame implements KeyListener, ActionListener {
 
     public static final int WIDTH = 32 * 13 + 32 * 4;// 528 +24; +32;
@@ -31,20 +33,24 @@ public class TankWar extends JFrame implements KeyListener, ActionListener {
     private JMenuItem about = null;
 
     public static void main(String[] args) {
-        TankWar tankWar = new TankWar();
-        tankWar.addKeyListener(tankWar);
+        SwingUtilities.invokeLater(() -> {
+            TankWar tankWar = new TankWar();
+            tankWar.addKeyListener(tankWar);
+            tankWar.setVisible(true);
+            tankWar.requestFocusInWindow();
+        });
     }
 
-    private TankWar() {
+    TankWar() {
         setTitle("坦克大战");// 初始化标题
         setBackground(Color.black);
-        setIconImage(new ImageIcon("image/bird.png").getImage());
+        getContentPane().setBackground(Color.GRAY);
+        setIconImage(ImageUtil.getMaterial("player1"));
         setSize(TankWar.WIDTH, TankWar.HEIGHT + 32); // 设置窗口宽度与高度
         setLayout(null);
         setLocationRelativeTo(null); // 设置居中显示
         setResizable(false); // 设置尺寸不可变
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true); // 设置可见为真
         init();
         toTitle(false);
     }
@@ -81,36 +87,47 @@ public class TankWar extends JFrame implements KeyListener, ActionListener {
         validate();
     }
 
-    public void paint(Graphics g) {
-        super.paint(g);
-        g.setColor(Color.gray);
-        g.fillRect(0, 50, this.getWidth(), this.getHeight());
-    }
-
-    private void remove() {
+    private void removeCurrentScene() {
         if (title != null) {
+            title.stopScene();
             remove(title);
             title = null;
         } else if (start != null) {
+            start.stopScene();
             remove(start);
             start = null;
         } else if (stage != null) {
+            stage.stopScene();
             stage.dispose();
             remove(stage);
             stage = null;
-            remove(data);
+            Game.stage = null;
+            if (data != null) {
+                data.stopScene();
+                remove(data);
+                data = null;
+            }
         } else if (count != null) {
+            count.stopScene();
             remove(count);
             count = null;
         } else if (mapEditor != null) {
+            mapEditor.stopScene();
             remove(mapEditor);
             mapEditor = null;
         }
+        revalidate();
         repaint();
     }
 
+    @Override
+    public void dispose() {
+        removeCurrentScene();
+        super.dispose();
+    }
+
     public void toTitle(boolean flag) {
-        remove();
+        removeCurrentScene();
         Game.GameInit();
         title = new Title(this);
         title.open = flag;
@@ -119,48 +136,47 @@ public class TankWar extends JFrame implements KeyListener, ActionListener {
             title.logoRemove.clear();
         }
         add(title);
-        Thread thread = new Thread(title);
-        thread.start();
+        title.startScene();
+        revalidate();
     }
 
     public void toGameStart() {
-        remove();
+        removeCurrentScene();
         start = new StageStart();
         add(start);
-        Thread thread = new Thread(start);
-        thread.start();
+        start.startScene();
+        revalidate();
     }
 
     public void toGame() {
-        remove();
+        removeCurrentScene();
         stage = new Stage();
-        add(stage);
-        Thread thread = new Thread(stage);
-        thread.start();
         Game.stage = this.stage;
+        add(stage);
+        stage.startScene();
 
         data = new Data(stage);
         add(data);
-        Thread thread2 = new Thread(data);
-        thread2.start();
+        data.startScene();
+        revalidate();
     }
 
     public void toEditor() {
-        remove();
+        removeCurrentScene();
         mapEditor = new MapEditor(new int[26][26]);
         add(mapEditor);
         mapEditor.addMouseListener(mapEditor);
         mapEditor.addMouseMotionListener(mapEditor);
-        Thread thread = new Thread(mapEditor);
-        thread.start();
+        mapEditor.startScene();
+        revalidate();
     }
 
     public void toCount() {
-        remove();
+        removeCurrentScene();
         count = new Count();
         add(count);
-        Thread thread = new Thread(count);
-        thread.start();
+        count.startScene();
+        revalidate();
     }
 
     public void keyPressed(KeyEvent e) {

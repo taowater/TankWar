@@ -13,6 +13,7 @@ public class Data extends Scene {
     private final Stage stage;
 
     public Data(Stage stage) {
+        super(50);
         this.stage = stage;
         setBounds(32 + stage.getWidth(), 32, 32 * 2, 32 * 13);
     }
@@ -31,7 +32,7 @@ public class Data extends Scene {
 //		for (int i = 0; i < stage.enumber; i++) {
 //			g.drawImage(enemyIcon, 16 + i % 2 * 16, 16 + i / 2 * 16, 16, 16, this);
 //		}
-        Ztream.of(Game.stage.getPlayers()).forEach((e, i) -> {
+        Ztream.of(stage.getPlayers()).forEach((e, i) -> {
             drawPlayer(e, g, i);
         });
 
@@ -52,10 +53,4 @@ public class Data extends Scene {
         Game.drawText(player.bulletType + 1 + "", 32, 72 + 128 * i + 64 + 2, 0, g, this);
     }
 
-    public void run() {
-        while (true) {
-            repaint();
-            Game.Sleep(50);
-        }
-    }
 }

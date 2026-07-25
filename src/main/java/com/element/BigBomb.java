@@ -2,11 +2,9 @@ package com.element;
 
 import com.util.ImageUtil;
 import com.util.MusicUtil;
-import lombok.Data;
 
 import java.awt.*;
 
-@Data
 public class BigBomb extends Bomb {
     public BigBomb(int x, int y) {
         super(x, y);

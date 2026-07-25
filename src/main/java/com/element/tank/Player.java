@@ -53,20 +53,29 @@ public class Player extends Tank {
         if (star.getIsLive()) {
             star.draw(g);
         } else if (getIsLive()) {
-            star.dispose();
             super.draw(g, tank);
             if (flash.getIsLive()) {
                 flash.draw(g);
             }
-            if (!Game.pause) {
-                setOldPosition();
-                active();
-                beRewarded();
+        }
+    }
+
+    @Override
+    public void update() {
+        if (star.getIsLive()) {
+            star.update();
+            return;
+        }
+        star.dispose();
+        if (getIsLive()) {
+            if (flash.getIsLive()) {
+                flash.update();
             }
-        } else {
-            if (maxlife > 0) {
-                reborn();
-            }
+            setOldPosition();
+            active();
+            beRewarded();
+        } else if (maxlife > 0) {
+            reborn();
         }
     }
 
@@ -133,7 +142,7 @@ public class Player extends Tank {
         level = 1;
         star.setLife(14);
         star.setIsLive(true);
-        flash.life = 32;
+        flash.setLife(32);
         flash.setIsLive(true);
         setIsLive(true);
         initMove();
